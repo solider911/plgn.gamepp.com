@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>绑定成功</title>
+</head>
+<link rel="stylesheet" href="__CSS__/check_ok.css">
+<script language="javascript" type="text/javascript">
+  var i = 3;
+  var intervalid;
+  intervalid = setInterval("fun()", 1000);
+  function fun() {
+      if (i == 0) {
+          $url = "{:url('index/personal/my_info',['act_type'=>'1'])}";
+          $url = $url.replace('.html','');
+          window.location.href = $url;
+          clearInterval(intervalid);
+      }
+      document.getElementById("time").innerHTML = i;
+      i--;
+  }
+</script>
+<body>
+	<div class="reg_center_big">
+					<div class="form-group">
+		  				<img src="__IMG__/img_05.png"  width="130px">
+		  			</div>
+		  			<div class="form-group" style="margin-top: 20px;">
+		  				<img src="__IMG__/success.png" width="320px">
+		  			</div>
+		  			<div class="form-group" style="margin-top: 20px;" id="ShowDiv">
+		  				邮箱绑定成功,<time id="time">3</time>秒后 自动跳转到个人中心...
+		  			</div>
+	</div>
+
+
+
+	<div class="footer">
+				游戏加加Game++版权所有,&copy;2013-2017蜀ICP备15011947号-1<br/>
+				GamePP.com联系电话:028-86095311
+	</div>
+</body>
+</html>

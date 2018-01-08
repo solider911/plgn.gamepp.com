@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>注册</title>
+</head>
+<link rel="stylesheet" href="__CSS__/pubg_registel.css">
+<body>
+	<div class="header"><img src="__IMG__/logo.png" alt=""><a href="http://gamepp.com/chichken/chichken.html" class="back">返回游戏官网页面</a></div>
+	<div class="reg_center_big">
+			<div class="reg_title">
+				<h3>注册</h3>
+				<form action="">
+					<div id="u" class="form-group">
+		  				<input id="username" spellcheck=false class="form-control" name="username" type="text" size="18" required="" placeholder="">
+		  				<span class="form-highlight"></span>
+		  				<span class="form-bar"></span>
+		  				<label for="username" class="float-label">邮箱</label>
+		  				<erroru id="erroru"></erroru>
+		  			</div>
+
+					<div id="p" class="form-group">
+		  				<input id="password" class="form-control" spellcheck=false name="password" type="password" size="18" required="">
+		  				<span class="form-highlight"></span>
+		  				<span class="form-bar"></span>
+		  				<label for="password" class="float-label">密码</label>
+		  				<erroru id="errorp"></erroru>
+					</div>
+
+					<div id="p2" class="form-group">
+		  				<input id="password2" class="form-control" spellcheck=false name="password2" type="password" size="18" required="">
+		  				<span class="form-highlight"></span>
+		  				<span class="form-bar"></span>
+		  				<label for="password2" class="float-label">确认密码</label>
+		  				<erroru id="errorp2"></erroru>
+					</div>
+
+					<div class="form-group">
+					<input type="checkbox" id="rem">
+					<label for="rem">已同意<a href="#" style="color: #6AB2E3;">《PUBG加加++用户协议》</a></label>
+						<errorr id="errorr">请勾选用户协议</errorr>
+					</div>
+
+					<div class="form-group">
+						<button id="submit" type="submit" ripple>注册</button>
+					</div>
+
+					<div class="form-group" style="margin-top: 45px; color: #666; font-size: 14px">
+						已有账号,马上<a href="{:url('index/login/index')}" style="color: #6AB2E3;text-decoration:none;">登录</a>
+					</div>
+				</form>
+			</div>
+	</div>
+
+	<div class="footer">
+				游戏加加Game++版权所有,&copy;2013-2017蜀ICP备15011947号-1<br/>
+				GamePP.com联系电话:028-86095311
+	</div>
+</body>
+<script type="text/javascript" src='__JS__/jquery.min.js'></script>
+<script type="text/javascript">
+$(document).ready(function () {
+    var username = $('#username'), password = $('#password'),password2 = $('#password2'), erroru = $('erroru'), errorp = $('errorp'), errorp2 = $('errorp2'),submit = $('#submit'), udiv = $('#u'), pdiv = $('#p'),pdiv2 = $('#p2'),rdiv = $('#r');
+    username.blur(function () {
+        user_code();
+    });
+
+    password.blur(function () {
+        pwd_code();
+    });
+    password2.blur(function () {
+        if (password.val() !== password2.val()) {
+            pdiv2.attr('errr', '');
+            return $('#errorp2').text('两次输入密码不一致');
+        } else {
+            pdiv2.removeAttr('errr');
+        }
+    });
+
+    function user_code(){
+        if (username.val() == '') {
+            udiv.attr('errr', '');
+            return $('#erroru').text('邮箱不能为空');
+        }else{
+            udiv.removeAttr('errr');
+        }
+        if (username.val().length > 18) {
+            udiv.attr('errr', '');
+            return $('#erroru').text('邮箱最多18个字符');
+        }else{
+            udiv.removeAttr('errr');
+        }
+        if (username.val().length < 4) {
+            udiv.attr('errr', '');
+            return $('#erroru').text('邮箱最少4个字符');
+        }else{
+            udiv.removeAttr('errr');
+        }
+        var reg = /^((([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6}\;))*(([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})))$/;
+
+        if(reg.test(username.val())){
+            udiv.removeAttr('errr');
+        }else{
+            udiv.attr('errr', '');
+            return $('#erroru').text('邮箱格式不正确');
+        }
+        
+        return true;
+    }
+    function pwd_code(){
+        if (password.val() == '') {
+            pdiv.attr('errr', '');
+            return $('#errorp').text('密码不能为空');
+        } else {
+            pdiv.removeAttr('errr');
+        }
+        if (password.val().length >16 || password.val().length < 6) {
+            pdiv.attr('errr', '');
+            return $('#errorp').text('密码长度为6-16字符');
+        } else {
+            pdiv.removeAttr('errr');
+        }
+
+        return true;
+    }
+    submit.on('click', function (event) {
+        event.preventDefault();
+        if(user_code() == true && pwd_code() == true){
+            if (password.val() !== password2.val()) {
+                pdiv2.attr('errr', '');
+                return $('#errorp2').text('两次输入密码不一致');
+            }
+            
+            //判断是否已阅读
+            if(!$('#rem').is(':checked')) {
+                $("#errorr").show();
+                return;
+            }else{
+                $("#errorr").hide();
+                var check_rem = '1';
+            }
+            //前端验证成功,提交form表单信息给服务器存储
+            var username = $('#username').val();
+            var pwd = $('#password').val();
+            var pwd2 = $('#password2').val();
+            
+            
+
+            //设置ajax
+            $.ajax({
+                url:'{:url("index/Register/register")}',
+                data:{'username':username,'pwd':pwd,'pwd2':pwd2,'check_rem':check_rem},
+                dataType:'json',
+                type:'post',
+                success:function (msg) {
+                    //要求服务器返回一个success成员,值为true
+                    if(msg.success===true){
+                        var username = msg.username;
+                        var uCode = msg.uCode;
+                        var url = "{:url('index/register/check_email',['username'=>'user_email','uCode'=>'code'])}";
+						var str = url.replace("user_email",username);
+                        var  res =  str.replace("code.html",uCode);
+                        window.location.href= res;
+                    }else if(msg.success===false){
+                        if(msg.error == '300'){
+                            udiv.attr('errr', '');
+                            $('#erroru').text(msg.info);
+                        }
+                        if(msg.error == '302'){
+                            pdiv.attr('errr', '');
+                            $('#errorp').text(msg.info);
+                        }
+                        if(msg.error == '204'){
+                            return $('#errorr').show()
+						}
+                        if(msg.error == '206'){
+                            udiv.attr('errr', '');
+                            return $('#erroru').text('邮箱已被注册');
+                        }
+                        if(msg.error == '208'){
+                            udiv.attr('errr', '');
+                            return $('#erroru').text('注册异常,请稍后重试');
+                        }
+                    }
+                }
+            });
+		}
+    });
+});
+</script>
+</html>

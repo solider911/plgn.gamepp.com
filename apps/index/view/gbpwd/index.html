@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>找回密码</title>
+</head>
+<link rel="stylesheet" href="__CSS__/gbpwd.css">
+<body>
+	<div class="header"><img src="__IMG__/logo.png" alt=""></div>
+	<div class="reg_center_big">
+			<div class="reg_title">
+				<h3>找回密码</h3>
+				<form action="">
+					<div id="u" class="form-group">
+		  				<input id="username" spellcheck=false class="form-control" name="username" type="text" size="18" required="" placeholder="">
+		  				<span class="form-highlight"></span>
+		  				<span class="form-bar"></span>
+		  				<label for="username" class="float-label">邮箱</label>
+		  				<erroru id="erroru"></erroru>
+		  			</div>
+       
+
+					<div class="form-group">
+						<button id="submit" type="submit">下一步</button>
+					</div>
+				</form>
+			</div>
+	</div>
+
+	<div class="footer">
+				游戏加加Game++版权所有,&copy;2013-2017蜀ICP备15011947号-1<br/>
+				GamePP.com联系电话:028-86095311
+	</div>
+</body>
+<script type="text/javascript" src='__JS__/jquery.min.js'></script>
+<script type="text/javascript">
+$(document).ready(function () {
+    var username = $('#username'),erroru = $('erroru'),submit = $('#submit'), udiv = $('#u');
+    username.blur(function () {
+        user_code();
+    });
+
+    function user_code(){
+        if (username.val() == '') {
+            udiv.attr('errr', '');
+            return $('#erroru').text('邮箱不能为空');
+        }else{
+            udiv.removeAttr('errr');
+        }
+        if (username.val().length > 18) {
+            udiv.attr('errr', '');
+            return $('#erroru').text('邮箱最多18个字符');
+        }else{
+            udiv.removeAttr('errr');
+        }
+        if (username.val().length < 4) {
+            udiv.attr('errr', '');
+            return $('#erroru').text('邮箱最少4个字符');
+        }else{
+            udiv.removeAttr('errr');
+        }
+        var reg = /^((([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6}\;))*(([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})))$/;
+
+        if(reg.test(username.val())){
+            udiv.removeAttr('errr');
+        }else{
+            udiv.attr('errr', '');
+            return $('#erroru').text('邮箱格式不正确');
+        }
+
+        return true;
+    }
+
+    submit.on('click', function (event) {
+        event.preventDefault();
+        var username = $('#username').val();
+        if(user_code() == true){
+            //设置ajax
+            $.ajax({
+                url:'{:url("index/gbpwd/gbpwdE")}',
+                data:{'username':username},
+                dataType:'json',
+                type:'post',
+                success:function (msg) {
+                    //要求服务器返回一个success成员,值为true
+                    if(msg.success===true){
+                        var username = msg.username;
+                        var uCode = msg.uCode;
+                        var url = "{:url('index/gbpwd/checkpwdE',['username'=>'user_email','uCode'=>'code'])}";
+                        var str = url.replace("user_email",username);
+                        var  res =  str.replace("code.html",uCode);
+                        window.location.href= res;
+                    }else if(msg.success===false){
+                        if(msg.error == '300'){
+                            udiv.attr('errr', '');
+                            $('#erroru').text(msg.info);
+                        }
+                        if(msg.error == '202'){
+                            udiv.attr('errr', '');
+                            $('#erroru').text('邮箱不存在');
+                        }
+                        if(msg.error == '203'){
+                            udiv.attr('errr', '');
+                            $('#erroru').text('用户未激活');
+                        }
+                        if(msg.error == '204'){
+                            console.log(msg.free);
+                            udiv.attr('errr', '');
+                            $('#erroru').text('用户被冻结');
+                        }
+                    }
+                }
+            });
+		}
+    });
+});
+</script>
+</html>

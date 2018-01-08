@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>更换邮箱</title>
+</head>
+<link rel="stylesheet" href="__CSS__/bd_email1.css">
+<style>
+	.email_explain{
+		position: absolute;
+		width: 500px;
+		height: 50px;
+		left: 56%;
+		top: 64%;
+		margin-left: -250px;
+		margin-top: 50px;
+		text-align: left;
+		line-height: 20px;
+		letter-spacing: 1px;
+		font-size: 13px;
+		color: #666;
+	}
+	.again_send{
+		position: absolute;
+		width: 600px;
+		height: 50px;
+		left: 50%;
+		top: 45%;
+		margin-left: -300px;
+		margin-top: 180px;
+		text-align: center;
+		letter-spacing: 1px;
+		font-size: 13px;
+		color: #666;
+	}
+</style>
+<body>
+	<div class="header"><img src="__IMG__/logo.png" alt=""><a href="http://gamepp.com/chichken/chichken.html" class="back">返回游戏官网页面</a></div>
+	<div class="reg_center_big" style="height: 400px;">
+			<div class="reg_title">
+				<h3>更换邮箱</h3>
+				<form action="">
+					<div id="u" class="form-group">
+		  				<input id="username" spellcheck=false class="form-control" name="username" type="text" size="18" required="" placeholder="">
+		  				<span class="form-highlight"></span>
+		  				<span class="form-bar"></span>
+		  				<label for="username" class="float-label">邮箱</label>
+		  				<erroru id="erroru"></erroru>
+		  			</div>
+
+		  			<div class="form-group">
+					<input type="checkbox" id="rem">
+					<label for="rem">已同意<a href="#" style="color: #6AB2E3;">《PUBG加加++用户协议》</a></label>
+                     <errorr id="errorr">请勾选用户协议</errorr>
+					</div>
+
+					<div class="form-group" id="submit_none">
+						<button id="submit" type="submit">绑定</button>
+					</div>
+					<div class="form-group" id="submit_none1" style="display: none">
+						<button id="submit1" type="submit" >确认绑定</button>
+					</div>
+				</form>
+			<div class="email_explain" style="display: none;" >
+				我们已发送<b>更换邮箱链接</b>到您的邮箱,请你登录邮箱查看链接后点击确认<br/>
+				</div>
+				<input type="hidden" value="" id="n_user_email">
+				<input type="hidden" value="" id="user_code">
+				<input type="hidden" value="" id="y_user_email">
+			</div>
+	</div>
+
+	<div class="footer">
+				游戏加加Game++版权所有,&copy;2013-2017蜀ICP备15011947号-1<br/>
+				GamePP.com联系电话:028-86095311
+	</div>
+</body>
+<script type="text/javascript" src='__JS__/jquery.min.js'></script>
+<script type="text/javascript">
+	
+	$("#submit1").on('click', function (event) {
+        event.preventDefault();
+        var n_user_email = $('#n_user_email').val();
+        var user_code = $('#user_code').val();
+        var y_user_email = $('#y_user_email').val();
+        var udiv = $('#u');
+            //设置ajax
+            $.ajax({
+                url:'{:url("index/personal/qr_email")}',
+                data:{'n_user_email':n_user_email,'user_code':user_code,'y_user_email':y_user_email},
+                dataType:'json',
+                type:'post',
+                success:function (msg) {
+                    //要求服务器返回一个success成员,值为true
+                    if(msg.success===true){
+                        $('#user_email').val(msg.n_username);
+                        $('#user_code').val(msg.uCode);
+                        $('#y_user_email').val(msg.y_username);
+                        $("#submit_none1").show();
+						window.location.href = "{:url('index/personal/cemail_ok')}";
+                    }else if(msg.success===false){
+                        if(msg.error == '202'){
+                            udiv.attr('errr', '');
+                            return $('#erroru').text('更换邮箱失败');
+                        }
+                        if(msg.error == '204'){
+                            udiv.attr('errr', '');
+                            return $('#erroru').text('请核实认证邮件');
+                        }
+                    }
+                }
+            });
+    });
+	
+    $(document).ready(function () {
+        var username = $('#username'),erroru = $('erroru'),submit = $('#submit'), udiv = $('#u');
+        username.blur(function () {
+            user_code();
+        });
+
+        function user_code(){
+            if (username.val() == '') {
+                udiv.attr('errr', '');
+                return $('#erroru').text('邮箱不能为空');
+            }else{
+                udiv.removeAttr('errr');
+            }
+            if (username.val().length > 18) {
+                udiv.attr('errr', '');
+                return $('#erroru').text('邮箱最多18个字符');
+            }else{
+                udiv.removeAttr('errr');
+            }
+            if (username.val().length < 4) {
+                udiv.attr('errr', '');
+                return $('#erroru').text('邮箱最少4个字符');
+            }else{
+                udiv.removeAttr('errr');
+            }
+            var reg = /^((([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6}\;))*(([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})))$/;
+
+            if(reg.test(username.val())){
+                udiv.removeAttr('errr');
+            }else{
+                udiv.attr('errr', '');
+                return $('#erroru').text('邮箱格式不正确');
+            }
+
+            return true;
+        }
+		
+        submit.on('click', function (event) {
+            event.preventDefault();
+            var username = $('#username').val();
+            if(user_code() == true){
+                //判断是否已阅读
+                if(!$('#rem').is(':checked')) {
+                    $("#errorr").show();
+                    return;
+                }else{
+                    $("#errorr").hide();
+                    var check_rem = '1';
+                }
+
+                //设置ajax
+                $.ajax({
+                    url:'{:url("index/personal/cemail")}',
+                    data:{'username':username,'check_rem':check_rem},
+                    dataType:'json',
+                    type:'post',
+                    success:function (msg) {
+                        //要求服务器返回一个success成员,值为true
+                        if(msg.success===true){
+                            $('#n_user_email').val(msg.n_username);
+                            $('#user_code').val(msg.uCode);
+                            $('#y_user_email').val(msg.y_username);
+                            $(".email_explain").show();
+                            $("#submit_none").hide();
+                            $("#submit_none1").show();
+                            
+                        }else if(msg.success===false){
+                            if(msg.error == '300'){
+                                udiv.attr('errr', '');
+                                $('#erroru').text(msg.info);
+                            }
+                            if(msg.error == '204'){
+                                udiv.attr('errr', '');
+                                return $('#erroru').text('新邮箱不能与之前邮箱相同');
+                            }
+                            if(msg.error == '206'){
+                                udiv.attr('errr', '');
+                                return $('#erroru').text('邮箱已被绑定');
+                            }
+                            if(msg.error == '208'){
+                                return $('#errorr').show()
+                            }
+                            if(msg.error == '302'){
+                                udiv.attr('errr', '');
+                                return $('#erroru').text('操作频繁,请稍后重试');
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    });
+</script>
+</html>

@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>绑定用户</title>
+</head>
+<link rel="stylesheet" type="text/css" href="__CSS__/bd_user.css">
+<link rel="stylesheet" href="__CSS__/reset.css" />
+<link rel="stylesheet" href="__CSS__/home.css">
+<link rel="stylesheet" href="__CSS__/main.css" />
+<link rel="shortcut icon" href="__IMG__/favicon.ico" />
+<style type="text/css">
+    .user_login_reg {
+        width: 200px;
+        height: 85px;
+        position: absolute;
+        right: 230px;
+        top: 0px;
+        text-align: left;
+        line-height: 85px;
+        color: #55A4FF;
+        font-size: 13px;
+    }
+
+    .user_login_reg a {
+        color: #55A4FF;
+    }
+</style>
+<body style="color: #EDF1F3">
+<div class="g-doc">
+    <div class="g-hd">
+          <div class="g-hdm">
+              <a class="logo" href="http://gamepp.com/" target="_blank" title="最好的免费游戏录像软件_硬件监控工具_游戏截图工具_游戏加加官网GamePP|FPS"><img alt="专业贴心好用的游戏加加" src="__IMG__/logo.gif" width="322" height="49"></a>
+              <div class="g-hdmn" id="g-hdmn">
+                <a href="../index.html" target="_self">首页</a>
+        <div class="n">吃鸡助手</div>
+                <a href="../download/download.html" target="_self">下载中心</a>
+                  <!--<a href="../patchfile/patchfile.html" target="_self">游戏运行库</a>-->
+                <a href="../log/log.html" target="_self">更新日志</a>
+                <a href="../help/help.html" target="_self">使用帮助</a>
+                <a href="http://bbs.gamepp.com" target="_blank">论坛</a>
+              </div>
+          </div>
+            <div class="user_login_reg">
+				{if condition="$data.is_login eq 0"}
+               <a href="http://plgn.gamepp.com/index.php?s=/index/login/index.html">登录</a> | <a href="http://plgn.gamepp.com/index.php?s=/index/register/index.html">注册</a>
+				{else/}
+				<img src="{$data['header_img']}" style="width: 35px;height: 35px; float: left;margin-top: 23px;border-radius: 50%">
+				<text style="color: #3D3D3D">{:session('username')}</text>
+				<a href="{:url('index/personal/logout')}">退出</a>
+				{/if}
+          	</div>
+    </div>
+</div>
+
+	<div class="reg_center_big">
+			<div id="tab_left">
+				<ul class="tabGroup" style="margin-top: 10px;margin-left: 30px">
+					<li id="m1" class="on" onclick="javascript:gopage(1)" style="color: #2398F1;">个人信息设置
+                        {if condition="$data.ws_info eq 1"}
+                        <div class="no_check" style="color: green">
+                        已完善
+                        </div>
+                        {else/}
+                        <div class="no_check">
+                        未完善
+                        </div>
+                        {/if}
+                        <div class="blueline" id="l1"></div></li>
+					<li id="m2" onclick="javascript:gopage(2)">社交账号绑定<div class="no_check"></div><div class="blueline" id="l2" style="display: none;"></div></li>
+					<li id="m3" onclick="javascript:gopage(3)">修改密码<div class="no_check"></div><div class="blueline" id="l3" style="display: none;"></div></li>
+				</ul>
+			</div>
+			
+			<div id="container">
+				<div id="content">
+					<div id="c1">
+						<form>
+							<div class="my_info">
+							<h3 style="color: #4D4D4D;font-family:'Microsoft yahei';font-size: 16px;"><b>个人信息设置</b></h3>
+							<div class="my_info_con">
+								<ul class="tabGroup_my">
+									<li class="tabGroup_my_li1">用户昵称&nbsp;&nbsp;&nbsp;<input type="text" name="nickname" id="nickname" value="{:session('nickname')}">&nbsp;&nbsp; <tit id="error" style="color: #999;font-size: 13px">(用于游戏组队和勇士系统,不超过16个字符)</tit></li>
+									 {if condition="$data.user_sex eq 1"}
+									<li class="tabGroup_my_li2">性别 <input name="user_sex" type="radio" value="1" checked />&nbsp;&nbsp;男&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input name="user_sex" type="radio" value="0" />&nbsp;&nbsp;女</li>
+									{else/}
+									<li class="tabGroup_my_li2">性别 <input name="user_sex" type="radio" value="1" />&nbsp;&nbsp;男&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input name="user_sex" type="radio" value="0" checked />&nbsp;&nbsp;女</li>
+									{/if}
+									<li class="tabGroup_my_li3">绑定邮箱&nbsp;&nbsp;&nbsp;{:session('username')}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:void(0)" id="c_email" style="text-decoration: none;color: #1692F0;">更换邮箱</a></li>
+                                    <input type="hidden" id="email" name="email" value="{:session('username')}">
+								</ul>
+
+								<div class="my_info_sub">
+									<button class="my_info_sub1" type="submit">取消修改</button>
+									<button class="my_info_sub2" id="submit" type="submit" style="background: #108FF0;">确认修改</button>
+								</div>
+							</div>
+						</div>
+						</form>
+					</div>
+				
+					<div id="c2" style="display:none">
+						<form style="color: #3D3D3D">
+							<div class="my_info">
+							<h3 style="color: #4D4D4D;font-family:'Microsoft yahei';font-size: 16px;"><b>社交账号绑定</b></h3>
+							<div class="my_info_con">
+								<ul class="tabGroup_my_img">
+									
+									<li class="tabGroup_img_li1">
+										<img src="__IMG__/ic_steam_0.png">
+										<div class="bd_content">
+											{if condition="$data.user_steam_id eq 1"}
+											<span class="bd_type">Steam账号</span>
+											<a href="javascript:void(0)"><div class="bd_no">取消绑定</div></a>
+											<span class="bd_state">已绑定</span>
+											{else/}
+											<span class="bd_type">Steam账号</span>
+											<a href="javascript:void(0)"><div class="bd_ok">+ 绑定</div></a>
+											<span class="bd_state">未绑定</span>
+											{/if}
+										</div>
+									</li>
+									
+									<li class="tabGroup_img_li2">
+										<img src="__IMG__/ic_qq_1.png">
+										<div class="bd_content">
+											{if condition="$data.user_qq_id eq 1"}
+											<span class="bd_type">QQ</span>
+											<a href="javascript:void(0)"><div class="bd_no">取消绑定</div></a>
+											<span class="bd_state">已绑定</span>
+											{else/}
+											<span class="bd_type">QQ</span>
+											<a href="javascript:void(0)"><div class="bd_ok">+ 绑定</div></a>
+											<span class="bd_state">未绑定</span>
+											{/if}
+										</div>
+									</li>
+									
+									
+									<li class="tabGroup_img_li3">
+										<img src="__IMG__/ic_wechat_1.png">
+										<div class="bd_content">
+											{if condition="$data.user_wx_id eq 1"}
+											<span class="bd_type">微信</span>
+											<a href="javascript:void(0)"><div class="bd_no">取消绑定</div></a>
+											<span class="bd_state">已绑定</span>
+											{else/}
+											<span class="bd_type">微信</span>
+											<a href="javascript:void(0)"><div class="bd_ok">+ 绑定</div></a>
+											<span class="bd_state">未绑定</span>
+											{/if}
+										</div>
+									</li>
+									
+									
+									<li class="tabGroup_img_li4">
+										<img src="__IMG__/ic_weibo_1.png">
+										<div class="bd_content">
+											{if condition="$data.user_wb_id eq 1"}
+											<span class="bd_type">微博</span>
+											<a href="javascript:void(0)" onclick="bd_wb_type_del()"><div class="bd_no">取消绑定</div></a>
+											<span class="bd_state">已绑定</span>
+											{else/}
+											<span class="bd_type">微博</span>
+											<a href="javascript:void(0)" onclick="bd_wb_type()"><div class="bd_ok">+ 绑定</div></a>
+											<span class="bd_state">未绑定</span>
+											{/if}
+										</div>
+									</li>
+									
+								</ul>
+							</div>
+						</div>
+						</form>
+					</div>
+
+					<div id="c3" style="display:none">
+						<form>
+							<div class="my_info">
+							<h3 style="color: #4D4D4D;font-family:'Microsoft yahei';font-size: 16px;"><b>个人信息设置</b></h3>
+							<div class="my_info_con">
+								<ul class="tabGroup_my">
+									<li class="tabGroup_my_li1">原始密码&nbsp;&nbsp;&nbsp;&nbsp;<input type="password" name="y_pwd" id="y_pwd">
+                                    &nbsp;&nbsp;<tit style="color: #999;font-size: 13px;margin: auto -4px;" id="errorp3">(6-16个字符,区分大小写)</tit></li>
+                                    
+									<li class="tabGroup_my_li1">新密码<input type="password" name="pwd" id="pwd" style="margin: auto 26px;">&nbsp;&nbsp;<tit style="color: #999;font-size: 13px;margin: auto -26px;" id="errorp1">(6-16个字符,区分大小写)</tit></li>
+									<li class="tabGroup_my_li1">确认密码&nbsp;&nbsp;&nbsp;&nbsp;<input type="password" name="pwd2" id="pwd2">&nbsp;&nbsp;<tit style="color: #999;font-size: 13px" id="errorp2">(请再次输入你的密码)</tit></li>
+								</ul>
+
+								<div class="my_info_sub">
+									<button class="my_info_sub1" type="submit">取消修改</button>
+									<button class="my_info_sub2" type="submit" id="submit1" style="background: #108FF0;">确认修改</button>
+								</div>
+							</div>
+						</div>
+						</form>
+					</div>
+			
+				</div>
+			</div>
+</div>
+	<div class="footer">
+				游戏加加Game++版权所有,&copy;2013-2017蜀ICP备15011947号-1<br />
+				GamePP.com联系电话:028-86095311
+	</div>
+
+<input type="hidden" id="username_email" value="{:session('username')}">
+</body>
+<script type="text/javascript" src='__JS__/jquery.min.js'></script>
+<script type="text/javascript">
+	//绑定微博
+	function bd_wb_type_del(){
+	    var username_email = $("#username_email").val();
+        $.ajax({
+            url: '{:url("index/Personal/bd_wb_type_del")}',
+            data: {'username_email': username_email},
+            dataType: 'json',
+            type: 'post',
+            success: function (msg) {
+                //要求服务器返回一个success成员,值为true
+                if (msg.success === true) {
+                    $('.bd_no').text('绑定');
+                } else if (msg.success === false) {
+                	alert(11111111);
+                }
+            }
+        });
+	}
+	$("#c_email").click(function () {
+        window.location.href = "{:url('index/personal/cemail')}";
+        if (navigator.userAgent.indexOf("MSIE") > 0) {
+            if (navigator.userAgent.indexOf("MSIE 6.0") > 0) {
+                window.opener = null;
+                window.close();
+            } else {
+                window.open('', '_top');
+                window.top.close();
+            }
+        }
+        else if (navigator.userAgent.indexOf("Firefox") > 0) {
+            window.location.href = 'about:blank ';
+        } else {
+            window.opener = null;
+            window.open('', '_self', '');
+            window.close();
+        }
+    });
+    $(document).ready(function () {
+        var nickname = $('#nickname'), pwd = $('#pwd'), pwd2 = $('#pwd2'), y_pwd = $('#y_pwd'), submit = $('#submit'),
+            submit1 = $('#submit1');
+        nickname.blur(function () {
+            user_code();
+        });
+
+        function user_code() {
+            if (nickname.val() == '') {
+                $('#error').css('color', 'red');
+                return $('#error').text('用户昵称不能为空');
+            }
+            if (nickname.val().length > 18) {
+                $('#error').css('color', 'red');
+                return $('#error').text('用户昵称最多16个字符');
+            }
+            if (nickname.val().length < 4) {
+                $('#error').css('color', 'red');
+                return $('#error').text('用户昵称最少4个字符');
+            }
+
+            $('#error').css('color', 'green');
+            $('#error').text('(用户昵称符合要求)');
+
+            return true;
+        }
+
+        submit.on('click', function (event) {
+            event.preventDefault();
+            var nickname = $('#nickname').val();
+            var user_sex = $('input:radio:checked').val();
+            var email = $('#email').val();
+            if (user_code() == true) {
+                //设置ajax
+                $.ajax({
+                    url: '{:url("index/Personal/up_my_info")}',
+                    data: {'nickname': nickname, 'user_sex': user_sex, 'email': email},
+                    dataType: 'json',
+                    type: 'post',
+                    success: function (msg) {
+                        //要求服务器返回一个success成员,值为true
+                        if (msg.success === true) {
+                            $('#error').css('color', 'green');
+                            $('#error').text('修改成功');
+                        } else if (msg.success === false) {
+                            if (msg.error == '300') {
+                                $('#error').css('color', 'red');
+                                $('#error').text(msg.info);
+                            }
+                        }
+                    }
+                });
+            }
+        });
+
+        y_pwd.blur(function () {
+            if (y_pwd.val() == '') {
+                $("#errorp3").css('color', 'red');
+                return $('#errorp3').text('请输入原密码');
+            } else {
+                $('#errorp3').text('');
+            }
+        });
+
+        pwd.blur(function () {
+            pwd_code();
+        });
+
+        function pwd_code() {
+            if (pwd.val() == '') {
+                $("#errorp1").css('color', 'red');
+                return $('#errorp1').text('密码不能为空');
+            } else {
+                $('#errorp1').text('');
+            }
+            if (pwd.val().length > 16 || pwd.val().length < 6) {
+                $("#errorp1").css('color', 'red');
+                return $('#errorp1').text('密码长度为6-16字符');
+            } else {
+                $('#errorp1').text('');
+            }
+
+            pwd2.blur(function () {
+
+            });
+            return true;
+        }
+
+        submit1.on('click', function (event) {
+            event.preventDefault();
+            if ($('#pwd').val() !== $('#pwd2').val()) {
+                $("#errorp2").css('color', 'red');
+                return $('#errorp2').text('两次输入密码不一致');
+            } else {
+                $('#errorp2').text('');
+            }
+            var y_pwd = $('#y_pwd').val();
+            var pwd = $('#pwd').val();
+            var pwd2 = $('#pwd2').val();
+
+            if (pwd_code() == true) {
+                //设置ajax
+                $.ajax({
+                    url: '{:url("index/Personal/up_pwd")}',
+                    data: {'y_pwd': y_pwd, 'pwd': pwd, 'pwd2': pwd2},
+                    dataType: 'json',
+                    type: 'post',
+                    success: function (msg) {
+                        //要求服务器返回一个success成员,值为true
+                        if (msg.success === true) {
+                            var url = "{:url('index/gbpwd/gbpwd_ok')}";
+                            window.location.href = url;
+                        } else if (msg.success === false) {
+                            if (msg.error == '300') {
+                                $('#errorp1').css('color', 'red');
+                                $('#errorp1').text(msg.info);
+                            }
+                            if (msg.error == '204') {
+                                $('#errorp3').css('color', 'red');
+                                $('#errorp3').text("原密码错误");
+                            }
+
+                            if (msg.error == '206') {
+                                $('#errorp1').css('color', 'red');
+                                $('#errorp1').text("新密码不能与原密码相同");
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    });
+
+
+    function gopage(n) {
+        var tag = document.getElementById("tab_left").getElementsByTagName("li");
+        var taglength = tag.length;
+
+        for (i = 1; i <= taglength; i++) {
+            document.getElementById("m" + i).className = "";
+            document.getElementById("m" + i).style.color = "";
+            document.getElementById("c" + i).style.display = 'none';
+            document.getElementById("l" + i).style.display = 'none';
+        }
+        document.getElementById("m" + n).className = "on";
+        document.getElementById("m" + n).style.color = "#2398F1";
+        document.getElementById("c" + n).style.display = '';
+        document.getElementById("l" + n).style.display = '';
+    }
+</script>
+<!-- JS只需改变className（以下示例仅作参考）： -->
+<script type="text/javascript">
+(function (_slides) {
+    each(_slides, function (_slide, i) {
+        var _ctrls = _slide.getElementsByTagName('i');
+        var _lists = _slide.getElementsByTagName('li');
+        each(_ctrls, function (_ctrl, i) {
+            _ctrl.onclick = function () {
+                each(_lists, function (_list, i) {
+                    delClass(_list, "z-crt");
+                });
+                each(_ctrls, function (_ctrl, i) {
+                    delClass(_ctrl, "z-crt");
+                });
+                addClass(_lists[i], "z-crt");
+                addClass(_ctrls[i], "z-crt");
+            }
+        });
+    });
+
+    function hasClass(_object, _clsname) {
+        var _clsname = _clsname.replace(".", "");
+        var _sCls = " " + (_object.className) + " ";
+        return (_sCls.indexOf(" " + _clsname + " ") != -1) ? true : false;
+    }
+
+    function toClass(_str) {
+        var _str = _str.toString();
+        _str = _str.replace(/(^\s*)|(\s*$)/g, "");
+        _str = _str.replace(/\s{2,}/g, " ");
+        return _str;
+    }
+
+    function addClass(_object, _clsname) {
+        var _clsname = _clsname.replace(".", "");
+        if (!hasClass(_object, _clsname)) {
+            _object.className = toClass(_object.className + (" " + _clsname));
+        }
+    }
+
+    function delClass(_object, _clsname) {
+        var _clsname = _clsname.replace(".", "");
+        if (hasClass(_object, _clsname)) {
+            _object.className = toClass(_object.className.replace(new RegExp("(?:^|\\s)" + _clsname + "(?=\\s|$)", "g"), " "));
+        }
+    }
+
+    function each(_objects, _fn) {
+        for (var i = 0, len = _objects.length; i < len; i++) {
+            _fn(_objects[i], i);
+        }
+    }
+})(document.getElementsByTagName('div'));
+</script>
+<script type="text/javascript">
+        function changetext() {
+            $("#bf").show();
+            $('#bg').hide();
+            $('.two').removeAttr("id");
+            $('.one').attr('id', "bt");
+        }
+
+        function changetexts(e) {
+            $("#bg").show();
+            $('#bf').hide();
+            $('#bt').removeAttr("id");
+            $('.one').removeAttr("id");
+            $('.two').attr('id', "bt");
+        }
+</script>
+<div style="top: 180px;right: 30px;position: fixed;">
+<script type="text/javascript">document.write('<iframe width="150" height="249" frameborder="0" scrolling="no" src="http://widget.weibo.com/relationship/bulkfollow.php?language=zh_cn&uids=5638986757&wide=1&color=C2D9F2,FFFFFF,0082CB,666666&showtitle=1&showinfo=1&sense=0&verified=1&count=1&refer=' + encodeURIComponent(location.href) + '&dpc=1"></iframe>')</script>
+
+</div>
+<div style="display:none;">
+<script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cspan id='cnzz_stat_icon_1255678423'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s4.cnzz.com/stat.php%3Fid%3D1255678423' type='text/javascript'%3E%3C/script%3E"));</script>
+<script src="/Public/Js/Jquery/jquery.js"></script>
+            <script src="/Public/Js/Jquery/jquery.scrollTo.js"></script>
+    <!--<script src="/Public/Js/home.js"></script>-->
+            <script type="text/javascript">
+                $(document).ready(function () {
+
+                    $(".area").hover(function () {
+
+                            $(this).find(".qq").show(100);
+                        }
+
+                        ,
+                        function () {
+
+                            $(this).find(".qq").hide(100);
+
+                        });
+
+                });
+                
+            </script>
+</html>

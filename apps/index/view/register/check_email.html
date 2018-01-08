@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>邮箱激活</title>
+</head>
+<link rel="stylesheet" href="__CSS__/check_email.css">
+<body>
+	<div class="header"><img src="__IMG__/logo.png" alt=""><a href="http://gamepp.com/chichken/chichken.html" class="back">返回游戏官网页面</a></div>
+	<div class="reg_center_big">
+			<div class="reg_title">
+				<h3>邮箱激活</h3>
+			</div>
+			<div class="email_explain">
+				我们已将激活链接发送到了您的邮箱, 请你登录邮箱检查并进行账户激活...
+			</div>
+			<div class="again_send">
+				未收到邮件, <a href="javascript:void(0)" onclick="cx_email()">重新发送</a>
+			</div>
+			<div class="back_reg">
+				<a href="{:url('index/register/index')}">< 返回注册页</a>
+			</div>
+	</div>
+
+	<div class="footer">
+				游戏加加Game++版权所有,&copy;2013-2017蜀ICP备15011947号-1<br/>
+				GamePP.com联系电话:028-86095311
+	</div>
+</body>
+<script>
+   function	cx_email(){
+       var test = window.location.href;
+       var str = test.replace('check_email','cx_email');
+       window.location.href = str;
+   }
+</script>
+</html>

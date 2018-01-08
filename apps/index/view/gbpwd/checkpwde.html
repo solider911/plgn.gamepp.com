@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>找回密码</title>
+</head>
+<link rel="stylesheet" href="__CSS__/checkpwdE.css">
+<body>
+	<div class="header"><img src="__IMG__/logo.png" alt=""></div>
+	<div class="reg_center_big">
+			<div class="reg_title">
+				<h3>找回密码</h3>
+
+				<div class="email_explain">
+				我们已将验证链接发送到了您的邮箱,请你登录邮箱查看并验证...
+                    <br/>
+                    <br/>
+                未收到邮件, <a href="javascript:void(0)" onclick="cx_email()">重新发送</a>
+				</div>
+			</div>
+        
+            <div class="back_reg">
+				<a href="{:url('index/gbpwd/index')}">返回上一步</a>
+			</div>
+	</div>
+
+	<div class="footer">
+				游戏加加Game++版权所有,&copy;2013-2017蜀ICP备15011947号-1<br/>
+				GamePP.com联系电话:028-86095311
+	</div>
+</body>
+<script>
+   function	cx_email(){
+       var test = window.location.href;
+       var str = test.replace('checkpwde','cx_email');
+       window.location.href = str;
+   }
+</script>
+</html>

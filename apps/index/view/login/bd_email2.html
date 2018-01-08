@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>绑定邮箱</title>
+</head>
+<link rel="stylesheet" href="__CSS__/bd_email2.css">
+<body>
+	<div class="header"><img src="__IMG__/logo.png" alt=""><a href="#" class="back">返回游戏官网页面</a></div>
+	<div class="reg_center_big">
+			<div class="reg_title">
+				<h3>绑定邮箱</h3>
+				<form action="">
+					<div id="u" class="form-group">
+		  				<input id="username" spellcheck=false class="form-control" name="username" type="text" size="18" required="" placeholder="">
+		  				<span class="form-highlight"></span>
+		  				<span class="form-bar"></span>
+		  				<label for="username" class="float-label">邮箱</label>
+		  				<erroru id="erroru"></erroru>
+		  			</div>
+
+		  			<div class="form-group">
+					<input type="checkbox" id="rem">
+					<label for="rem">已同意<a href="#" style="color: #6AB2E3;">《PUBG加加++用户协议》</a></label>
+                        <errorr id="errorr">请勾选用户协议</errorr>
+					</div>
+
+					<div class="form-group">
+						<button id="submit" type="submit">绑定</button>
+					</div>
+			</div>
+	</div>
+
+	<div class="footer">
+				游戏加加Game++版权所有,&copy;2013-2017蜀ICP备15011947号-1<br/>
+				GamePP.com联系电话:028-86095311
+	</div>
+</body>
+<script type="text/javascript" src='__JS__/jquery.min.js'></script>
+<script type="text/javascript">
+$(document).ready(function () {
+    var username = $('#username'),erroru = $('erroru'),submit = $('#submit'), udiv = $('#u');
+    username.blur(function () {
+        user_code();
+    });
+
+    function user_code(){
+        if (username.val() == '') {
+            udiv.attr('errr', '');
+            return $('#erroru').text('邮箱不能为空');
+        }else{
+            udiv.removeAttr('errr');
+        }
+        if (username.val().length > 18) {
+            udiv.attr('errr', '');
+            return $('#erroru').text('邮箱最多18个字符');
+        }else{
+            udiv.removeAttr('errr');
+        }
+        if (username.val().length < 4) {
+            udiv.attr('errr', '');
+            return $('#erroru').text('邮箱最少4个字符');
+        }else{
+            udiv.removeAttr('errr');
+        }
+        var reg = /^((([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6}\;))*(([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})))$/;
+
+        if(reg.test(username.val())){
+            udiv.removeAttr('errr');
+        }else{
+            udiv.attr('errr', '');
+            return $('#erroru').text('邮箱格式不正确');
+        }
+
+        return true;
+    }
+
+
+
+    submit.on('click', function (event) {
+        event.preventDefault();
+        var username = $('#username').val();
+        if(user_code() == true){
+            //判断是否已阅读
+            if(!$('#rem').is(':checked')) {
+                $("#errorr").show();
+                return;
+            }else{
+                $("#errorr").hide();
+                var check_rem = '1';
+            }
+
+            //设置ajax
+            $.ajax({
+                url:'{:url("index/login/bd_email")}',
+                data:{'username':username,'check_rem':check_rem},
+                dataType:'json',
+                type:'post',
+                success:function (msg) {
+                    //要求服务器返回一个success成员,值为true
+                    if(msg.success===true){
+                        window.location.href="{:url('index/login/bd_email')}";
+                    }else if(msg.success===false){
+                        if(msg.error == '300'){
+                            udiv.attr('errr', '');
+                            $('#erroru').text(msg.info);
+                        }
+                        if(msg.error == '206'){
+                            udiv.attr('errr', '');
+                            return $('#erroru').text('邮箱已被注册');
+                        }
+                        if(msg.error == '204'){
+                            udiv.attr('errr', '');
+                            $('#erroru').text('邮箱已被冻结');
+                        }
+                        if(msg.error == '208'){
+                            return $('#errorr').show()
+                        }
+                    }
+                }
+            });
+        }
+    });
+});
+</script>
+</html>

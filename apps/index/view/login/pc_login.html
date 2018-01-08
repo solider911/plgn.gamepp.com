@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>登录</title>
+</head>
+<link rel="stylesheet" href="__CSS__/pc_pubg_login.css">
+<body>
+	<div class="header"><img src="__IMG__/logo.png" width="150px" style="margin-top: 10px"><a href="" class="back"><img src="__IMG__/btn_close.png" style="margin-top: 5px"></a><a href="#" class="back"><img src="__IMG__/btn_refresh.png" style="margin-top: 5px"></a></div>
+	<div class="reg_center_big">
+			<div class="reg_title">
+				<h3>登录</h3>
+				<form action="">
+					<div id="u" class="form-group">
+						{if condition="$data['rem'] eq 1"}
+		  				<input id="username" spellcheck=false class="form-control" name="username" type="text" size="18" required="" placeholder="" value="{$data['username']}">
+						{/if}
+						{if condition="$data['rem'] eq 0"}
+		  				<input id="username" spellcheck=false class="form-control" name="username" type="text" size="18" required="" placeholder="" >
+						{/if}
+		  				<span class="form-highlight"></span>
+		  				<span class="form-bar"></span>
+		  				<label for="username" class="float-label">邮箱</label>
+		  				<erroru id="erroru"></erroru>
+		  			</div>
+
+					<div id="p" class="form-group">
+		  				{if condition="$data['rem'] eq 1"}
+		  				<input id="password" class="form-control" spellcheck=false name="password" type="password" size="18" required="" value="{$data['pwd']}">
+						{/if}
+						{if condition="$data['rem'] eq 0"}
+		  				<input id="password" class="form-control" spellcheck=false name="password" type="password" size="18" required="">
+						{/if}
+		  				<span class="form-highlight"></span>
+		  				<span class="form-bar"></span>
+		  				<label for="password" class="float-label">密码</label>
+		  				<errorp id="errorp"></errorp>
+					</div>
+					
+					<div class="form-group" style="text-align: left;">
+						
+						{if condition="$data['rem'] eq 1"}
+                   		<input type="checkbox" name="keep_pwd" id="rem" value="1" checked>
+                   		{/if}
+                   		{if condition="$data['rem'] eq 0"}
+                   		<input type="checkbox" name="keep_pwd" id="rem" value="1">
+                   		{/if}
+						<label for="rem">记住密码</label>
+						&nbsp;&nbsp;&nbsp;
+                        {if condition="$data['re_lo'] eq 1"}
+                   		<input type="checkbox" id="re_lo" value="1" checked>
+                   		{/if}
+                   		{if condition="$data['re_lo'] eq 0"}
+                   		<input type="checkbox" id="re_lo" value="1">
+                   		{/if}
+						
+						<label for="re_lo">自动登录</label>
+				
+					
+					<a href="{:url('index/gbpwd/index')}" style="color: #666;float:right;margin-right: 2px;text-decoration: none;font-size: 13px;margin-top: 2px;">忘记密码?</a>
+					</div>
+
+					<div class="form-group">
+						<button id="submit" type="submit">登录</button>
+					</div>
+
+					<div class="form-group">
+						<div class="ligin_type">
+							其他登录方式:
+								<ul>
+									<li><a href=""><img src="__IMG__/btn_qq.png" alt="QQ"></a></li>
+									<li><a href=""><img src="__IMG__/btn_wechat.png" alt="微信"></a></li>
+									<li><a href="{:url('index/login/weibologin')}"><img src="__IMG__/btn_weibo.png" alt="微博"></a></li>
+								</ul>
+
+							
+							<div class="reg_user"><a href="{:url('index/Register/index')}" style="color: #9A9BA2">注册账号></a></div>
+						</div>
+					</div>
+
+				</form>
+			</div>
+	</div>
+</body>
+<script type="text/javascript" src='__JS__/jquery.min.js'></script>
+<script type="text/javascript">
+$(document).ready(function () {
+
+    var username = $('#username'), password = $('#password'),erroru = $('erroru'), errorp = $('errorp'),submit = $('#submit'), udiv = $('#u'), pdiv = $('#p');
+    username.blur(function () {
+        user_code();
+    });
+
+    password.blur(function () {
+        pwd_code();
+    });
+
+    function user_code(){
+        if (username.val() == '') {
+            udiv.attr('errr', '');
+            return $('#erroru').text('邮箱不能为空');
+        }else{
+            udiv.removeAttr('errr');
+        }
+        if (username.val().length > 18) {
+            udiv.attr('errr', '');
+            return $('#erroru').text('邮箱最多18个字符');
+        }else{
+            udiv.removeAttr('errr');
+        }
+        if (username.val().length < 4) {
+            udiv.attr('errr', '');
+            return $('#erroru').text('邮箱最少4个字符');
+        }else{
+            udiv.removeAttr('errr');
+        }
+        var reg = /^((([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6}\;))*(([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})))$/;
+
+        if(reg.test(username.val())){
+            udiv.removeAttr('errr');
+        }else{
+            udiv.attr('errr', '');
+            return $('#erroru').text('邮箱格式不正确');
+        }
+
+        return true;
+    }
+    function pwd_code(){
+        if (password.val() == '') {
+            pdiv.attr('errr', '');
+            return $('#errorp').text('密码不能为空');
+        } else {
+            pdiv.removeAttr('errr');
+        }
+        if (password.val().length >16 || password.val().length < 6) {
+            pdiv.attr('errr', '');
+            return $('#errorp').text('密码长度为6-16字符');
+        } else {
+            pdiv.removeAttr('errr');
+        }
+
+        return true;
+    }
+
+    submit.on('click', function (event) {
+        event.preventDefault();
+        if(user_code() == true && pwd_code() == true){
+            //前端验证成功,提交form表单信息给服务器存储
+            var username = $('#username').val();
+            var pwd = $('#password').val();
+            if($('#rem').is(':checked')) {
+                var keep_pwd = $('#rem').val();
+            }else{
+                var keep_pwd = '0';
+            }
+            if($('#re_lo').is(':checked')) {
+                var re_lo = $('#re_lo').val();
+            }else{
+                var re_lo = '0';
+            }
+            //设置ajax
+            $.ajax({
+                url:'{:url("index/Login/login")}',
+                data:{'username':username,'pwd':pwd,'keep_pwd':keep_pwd,'re_lo':re_lo},
+                dataType:'json',
+                type:'post',
+                success:function (msg) {
+                    //要求服务器返回一个success成员,值为true
+                    if(msg.success===true){
+                        alert('登录成功!');
+
+                    }else if(msg.success===false){
+                        if(msg.error == '300'){
+                            udiv.attr('errr', '');
+                            $('#erroru').text(msg.info);
+                        }
+                        if(msg.error == '302'){
+                            pdiv.attr('errr', '');
+                            $('#errorp').text(msg.info);
+                        }
+                        if(msg.error == '202'){
+                            udiv.attr('errr', '');
+                            $('#erroru').text('用户不存在');
+                        }
+                        if(msg.error == '203'){
+                            udiv.attr('errr', '');
+                            $('#erroru').text('用户未激活');
+                        }
+                        if(msg.error == '204'){
+                            console.log(msg.free);
+                            udiv.attr('errr', '');
+                            $('#erroru').text('用户被冻结');
+                        }
+                        if(msg.error == '205'){
+                            pdiv.attr('errr', '');
+                            $('#errorp').text('密码错误');
+                        }
+                        if(msg.error == '206'){
+                            pdiv.attr('errr', '');
+                            $('#errorp').text('登录失败,请稍后重试');
+                        }
+                    }
+                }
+            });
+        }
+    });
+});
+</script>
+</html>
