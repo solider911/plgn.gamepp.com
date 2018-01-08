@@ -13,24 +13,28 @@ use think\Session;
 use think\Url;
 url::root('/index.php?s=');
 class Personal extends Base {
+
+
+
+
+    
     //个人信息首页
     public function my_info(Request $request){
        //设定用户登录状态 act_type:
        $type = $request->param();
        $username =  Session::get('username');
 
+       //获取用户数据
+        $nickname = Db::table('ys_login_account')
+            ->where('user_account','=',$username)
+            ->find();
+
         if($username == null){
             $data['is_login'] = '0'; //0为没登录
             return $this->fetch();
         }else{
             $data['is_login'] = '1'; //1为登录
-            //用户单纯用邮箱默认头像
-            $data['header_img'] = "__IMG__/de_he_img.jpg";
-            //判断用户有没有昵称
-            $nickname = Db::table('ys_login_account')
-                ->where('user_account','=',$username)
-                ->find();
-            //判断用户是否完善
+            //判断用户是否完善   判断用户是否完善
             if($nickname['user_nickname'] != null){
                 $data['ws_info'] = '1';
                 //用户性别
@@ -44,14 +48,11 @@ class Personal extends Base {
         //用户普通登录
         if($type['act_type'] == '0'){
             //判断用户有没有昵称
-            $nickname = Db::table('ys_login_account')
-                ->where('user_account','=',$username)
-                ->find();
-
             if($nickname['user_nickname'] != null){
-                Session::set('nickname',$nickname['user_nickname']);
+                $data['nickname'] = $nickname['user_nickname'];
+                $data['header_img'] = "__IMG__/de_he_img.jpg";  //默认头像
             }else{
-                Session::set('nickname',null);
+                $data['nickname'] = '';
             }
         }
 
@@ -77,15 +78,7 @@ class Personal extends Base {
                $data['user_sex'] = $nickname['user_sex'];
            }
        }
-       //2位微博登录没有绑定
-       if($type['act_type'] == '2'){
-           //获取头像
-           $header_img = Db::table('ys_login_wb')
-               ->where('user_wb_id','=',Session::get('user_wb_id'))
-               ->find(Session::get('user_wb_id'));
-           dump(Session::get('user_wb_id'));
-           $data['header_img'] = $header_img['user_wb_image_url'];
-       }
+
 
        //判断第三方是否绑定
        $bd_type = DB::table('ys_login_account')
