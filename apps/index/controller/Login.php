@@ -112,7 +112,6 @@ class Login extends Controller {
                     ->where('user_account','=',$form_data['user_account'])
                     ->field('user_salt')
                     ->find();
-                $salt = implode($salt);
 
                 //密码盐值加密
                 $pwd_sa = md5($pwd.$salt);
@@ -233,10 +232,10 @@ EOF;
                 $user_info = Db::table('ys_login_account')
                         ->where('user_wb_id','=',$returnUserInfo['user_wb_id'])
                         ->find();
-                //用户绑定账号后
+
+                //第三方不是首次登陆
                 if($user_info == true){
-                    //用户绑定 将用户邮箱存入session
-                    Session::set('email',$user_info['user_account_id']);
+
                     // 更新用户状态 账号更新
                     Db::table('ys_login_account')
                         ->where('user_account_id','=',$returnUserInfo['user_wb_id'])
@@ -258,18 +257,13 @@ EOF;
                     $url = "http://plgn.gamepp.com/?s=/index/personal/my_info/act_type/1";
                     return header("Location:".$url);
 
+                }else{
+                    //用户没有绑定邮箱 获取自增id
+                    Session::set('wbcode',$returnUserInfo['user_wb_id']);
+                    //第一次没有邮箱 绑定邮箱
+                    $url = "http://plgn.gamepp.com/?s=index/login/bd_email1";
+                    return Header("Location: $url");
                 }
-
-                //获取自增id 用户没有绑定邮箱
-                $user_wb = Db::table('ys_login_wb')
-                    ->where('user_wb_openid','=',$user_message['id'])
-                    ->find();
-                Session::set('wbcode',$user_wb['user_wb_id']);
-
-                //第一次没有邮箱 绑定邮箱
-                $url = "http://plgn.gamepp.com/?s=index/login/bd_email1";
-                return Header("Location: $url");
-
             }else{
                 //如果微博用户第一次登录 保存信息
                 $userInfo['user_wb_name']    = $user_message['screen_name'];   //微博昵称
@@ -281,11 +275,7 @@ EOF;
 
                 if ($data == true){
                     //获取自增id
-                    $user_wb = Db::table('ys_login_wb')
-                        ->where('user_wb_openid','=',$user_message['id'])
-                        ->find();
-
-                    Session::set('wbcode',$user_wb['user_wb_id']);
+                    Session::set('wbcode',$returnUserInfo['user_wb_id']);
 
                     //第一次没有邮箱 绑定邮箱
                     $url = "http://plgn.gamepp.com/?s=index/login/bd_email1";
