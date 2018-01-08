@@ -142,6 +142,7 @@ class Login extends Controller {
                 }else{
                     Session::set('is_re_lo','0'); //否
                 }
+
                 // 更新用户状态
                 Db::table('ys_login_account')
                     ->where('user_account','=',$username)
@@ -152,7 +153,6 @@ class Login extends Controller {
                     ->setField('user_last_login_time',date('Y-m-d H-i-s'));
 
                 Session::set('username',$username);
-
                 return json(['success'=>true]);
 
             }else{
@@ -216,6 +216,7 @@ EOF;
             //根据uid获取微博用户信息
             $user_message = $oAuthResult->show_user_by_id($uid_get['uid']);
 
+
             //判断第三方是否登录过
             $returnUserInfo = Db::table('ys_login_wb')
                 ->where('user_wb_openid','=',$user_message['id'])
@@ -223,13 +224,14 @@ EOF;
 
             //第三方已经登录
             if ($returnUserInfo==true){
+
                 //将用户信息存入session
                 Session::set('username',$returnUserInfo['user_wb_name']);
                 Session::set('header_img',$returnUserInfo['user_wb_image_url']);
 
                 //获取用户才信息
                 $user_info = Db::table('ys_login_account')
-                        ->where('user_account_id','=',$returnUserInfo['user_wb_id'])
+                        ->where('user_wb_id','=',$returnUserInfo['user_wb_id'])
                         ->find();
                 //用户绑定账号后
                 if($user_info == true){
@@ -257,6 +259,7 @@ EOF;
                     return header("Location:".$url);
 
                 }
+
                 //获取自增id 用户没有绑定邮箱
                 $user_wb = Db::table('ys_login_wb')
                     ->where('user_wb_openid','=',$user_message['id'])
@@ -330,7 +333,6 @@ EOF;
                 if($user_account['user_wb_id'] != null){
                     return json(['success'=>false,'error'=>'206']);
                 }
-
 
                 //邮箱激活随机码
                 $user_active_code = substr(md5($username.time()),-15);
