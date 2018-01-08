@@ -152,6 +152,10 @@ class Login extends Controller {
                     ->setField('user_last_login_time',date('Y-m-d H-i-s'));
 
                 Session::set('username',$username);
+
+                $login_ret['success'] = true;
+                $login_ret['utoken'] = "123456";
+
                 return json(['success'=>true]);
 
             }else{
