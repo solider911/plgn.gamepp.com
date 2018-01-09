@@ -158,10 +158,6 @@ class Login extends Controller {
 
                 //传入session 判断登陆
                 Session::set('username',$username);
-
-                $login_ret['success'] = true;
-                $login_ret['utoken'] = "123456";
-
                 return json(['success'=>true]);
 
             }else{
