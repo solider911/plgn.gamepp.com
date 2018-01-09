@@ -24,6 +24,7 @@ class Personal extends Base {
         $user_data = Db::table('ys_login_account')
             ->where('user_account','=',$username)
             ->find();
+
         if($username == null){
             $data['is_login'] = '0'; //0为没登录
             return $this->fetch();
@@ -54,16 +55,17 @@ class Personal extends Base {
                ->find();
            $data['header_img'] = $header_img['user_wb_image_url'];
 
-            //判断用户有没有昵称
+            //获取微博昵称
            $nickname = Db::table('ys_login_wb')
                ->alias('w')
                ->join('ys_login_account a','w.user_wb_id = a.user_wb_id')
-               ->where('w.user_wb_id','=','a.user_account_id')
+               ->where('w.user_wb_id','=',$user_data['user_wb_id'])
                ->find();
-
                $data['nickname'] = $nickname['user_nickname'];
                $data['user_sex'] = $nickname['user_sex'];
        }
+
+
 
        //判断第三方是否绑定
         //预设为1

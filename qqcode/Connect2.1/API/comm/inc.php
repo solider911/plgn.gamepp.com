@@ -1,0 +1,2 @@
+<?php die('forbidden'); ?>
+{"appid":"101456064","appkey":"53e51ff07928168b03f6e1f34007858a","callback":"http://plgn.gamepp.com/?s=/index/login/qqCallback","scope":"get_user_info","errorReport":true,"storageType":"file","host":"localhost","user":"root","password":"root","database":"test"}

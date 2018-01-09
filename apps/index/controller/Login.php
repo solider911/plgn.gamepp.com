@@ -8,6 +8,8 @@ namespace app\index\controller;
 
 use app\common\common\Email;
 use app\common\common\OAuthException;
+use app\common\common\QQ_LoginAction;
+use app\common\common\QQsdk;
 use think\Controller;
 use think\Db;
 use think\Request;
@@ -144,15 +146,12 @@ class Login extends Controller {
                 if($utype == '0'){
                     $user_info = Db::table('ys_login_account')
                         ->where('user_account','=',$username)
+                        ->setField('user_token',hash("sha1",$username.time().$salt));
+                    $user_data = Db::table('ys_login_account')
+                        ->where('user_account','=',$username)
                         ->find();
-
-                    $data = array(
-                        'uid' => $user_info['user_account'],
-                        'header_url'=> '__IMG__/de_he_img.jpg',
-                        'nickname'=>$user_info['user_nickname']
-                    );
-
-                    return json(['success'=>true,'utype'=>$utype,'data'=>$data]);
+                    return json(['success'=>true,'utype'=>$utype,'uid'=>$username,'token'=>$user_data['user_token'],'nickname'=>$user_data['user_nickname']
+,'header_url'=>'']);
                 }
 
                 //传入session 判断登陆
@@ -170,19 +169,7 @@ class Login extends Controller {
             }
         }
     }
-
     //第三方登录
-    //微信回调地址
-    public function wxCallback(){
-	    echo '微信回调地址';
-    }
-
-    public function qqCallback(){
-        echo 'qq回调地址';
-    }
-
-
-
     //微博oauth2.0授权登录
     public function weibologin(){
 	    //pc端登录类型
@@ -281,13 +268,14 @@ class Login extends Controller {
 
                         return json(['success'=>true,'utype'=>$utype,'data'=>$data]);
                     }
-
+                    Session::set('username',$user_info['user_account']);
                     Session::set('user_wb_id',$returnUserInfo['user_wb_id']);
                     $url = "http://plgn.gamepp.com/?s=/index/personal/my_info/act_type/1";
                     return header("Location:".$url);
 
                 }else{
                     $bd_info = $request->param();
+                    $bd_info['bd_type'] = '';
                     //微博绑定
                     if($bd_info['bd_type'] == '0'){
                         //获取user_wb_id
@@ -328,6 +316,8 @@ class Login extends Controller {
                     $url = "http://plgn.gamepp.com/index.php?s=/index/personal/my_info/act_type/{$bd_info['act_type']}";
                     return header("Location:".$url);
                 }
+
+
                 $data = Db::table('ys_login_wb')->insert($userInfo);
                 if ($data == true){
                     //获取自增id
@@ -557,6 +547,27 @@ class Login extends Controller {
     }
 
 
+
+    //微信回调地址
+    public function wxCallback(){
+        echo '微信回调地址';
+    }
+    //qq授权页面
+    public function qqlogin(){
+	    $app_id = '101456064';
+        $redirect = 'http://plgn.gamepp.com/?s=/index/login/qqCallback';
+        //$redirect 为回调地址  $app_id 应用编号
+        $url = 'https://graph.qq.com/oauth2.0/authorize?response_type=code&client_id=' . $app_id . '&redirect_uri=' . $redirect;
+        header('Location:' . $url);
+    }
+    public function qqCallback(){
+        if(isset($_GET['code'])) {
+            $qq_sdk = new QQsdk();
+            $token = $qq_sdk->get_user_info($_GET['code']);
+            dump($tokne);
+        }
+    }
+
     //绑定成功页面
     public function  bd_ok(){
 	    return $this->fetch();
@@ -595,5 +606,9 @@ class Login extends Controller {
 
         $this->assign('data',$data);
         return $this->fetch('pc_login');
+    }
+
+    public function pc_login_check(){
+
     }
 }
