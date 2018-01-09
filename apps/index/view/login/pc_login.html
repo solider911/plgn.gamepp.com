@@ -61,7 +61,7 @@
 								<ul>
 									<li><a href=""><img src="__IMG__/btn_qq.png" alt="QQ"></a></li>
 									<li><a href=""><img src="__IMG__/btn_wechat.png" alt="微信"></a></li>
-									<li><a href="{:url('index/login/weibologin')}"><img src="__IMG__/btn_weibo.png" alt="微博"></a></li>
+									<li><a href="{:url('index/login/weibologin',['utype'=>'1'])}"><img src="__IMG__/btn_weibo.png" alt="微博"></a></li>
 								</ul>
 
 							
@@ -158,7 +158,7 @@ $(document).ready(function () {
                 success:function (msg) {
                     //要求服务器返回一个success成员,值为true
                     if(msg.success===true){
-                        alert(msg.utype);
+                        console.log(msg.data);
 
                     }else if(msg.success===false){
                         if(msg.error == '300'){

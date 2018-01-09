@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>绑定用户</title>
+	<title>个人中心</title>
 </head>
 <link rel="stylesheet" type="text/css" href="__CSS__/bd_user.css">
 <link rel="stylesheet" href="__CSS__/reset.css" />
@@ -46,7 +46,7 @@
                <a href="http://plgn.gamepp.com/index.php?s=/index/login/index.html">登录</a> | <a href="http://plgn.gamepp.com/index.php?s=/index/register/index.html">注册</a>
 				{else/}
 				<img src="{$data['header_img']}" style="width: 35px;height: 35px; float: left;margin-top: 23px;border-radius: 50%">
-				<text style="color: #3D3D3D">{:session('username')}</text>
+				<text style="color: #3D3D3D">{$data['nickname']}</text>
 				<a href="{:url('index/personal/logout')}">退出</a>
 				{/if}
           	</div>
@@ -115,7 +115,7 @@
 											<span class="bd_state">已绑定</span>
 											{else/}
 											<span class="bd_type">Steam账号</span>
-											<a href="javascript:void(0)"><div class="bd_ok">+ 绑定</div></a>
+											<a href="javascript:void(0)" onclick="bd_wb_type_add(3)"><div class="bd_ok">+ 绑定</div></a>
 											<span class="bd_state">未绑定</span>
 											{/if}
 										</div>
@@ -130,7 +130,7 @@
 											<span class="bd_state">已绑定</span>
 											{else/}
 											<span class="bd_type">QQ</span>
-											<a href="javascript:void(0)"><div class="bd_ok">+ 绑定</div></a>
+											<a href="javascript:void(0)" onclick="bd_wb_type_add(2)"><div class="bd_ok">+ 绑定</div></a>
 											<span class="bd_state">未绑定</span>
 											{/if}
 										</div>
@@ -146,7 +146,7 @@
 											<span class="bd_state">已绑定</span>
 											{else/}
 											<span class="bd_type">微信</span>
-											<a href="javascript:void(0)"><div class="bd_ok">+ 绑定</div></a>
+											<a href="javascript:void(0)" onclick="bd_wb_type_add(1)"><div class="bd_ok">+ 绑定</div></a>
 											<span class="bd_state">未绑定</span>
 											{/if}
 										</div>
@@ -158,12 +158,12 @@
 										<div class="bd_content">
 											{if condition="$data.user_wb_id eq 1"}
 											<span class="bd_type">微博</span>
-											<a href="javascript:void(0)" onclick="bd_wb_type_del()"><div class="bd_no">取消绑定</div></a>
-											<span class="bd_state">已绑定</span>
+											<a href="javascript:void(0)" onclick="bd_wb_type_del()"><div id="wb_bd_no" class="bd_no">取消绑定</div></a>
+											<span id="wb_bd_state" class="bd_state">已绑定</span>
 											{else/}
 											<span class="bd_type">微博</span>
-											<a href="javascript:void(0)" onclick="bd_wb_type()"><div class="bd_ok">+ 绑定</div></a>
-											<span class="bd_state">未绑定</span>
+											<a href="javascript:void(0)" onclick="bd_wb_type_add(0)"><div class="bd_ok">+ 绑定</div></a>
+											<span  id="wb_bd_state" class="bd_state">未绑定</span>
 											{/if}
 										</div>
 									</li>
@@ -208,7 +208,7 @@
 </body>
 <script type="text/javascript" src='__JS__/jquery.min.js'></script>
 <script type="text/javascript">
-	//绑定微博
+	//取消绑定微博
 	function bd_wb_type_del(){
 	    var username_email = $("#username_email").val();
         $.ajax({
@@ -219,13 +219,35 @@
             success: function (msg) {
                 //要求服务器返回一个success成员,值为true
                 if (msg.success === true) {
-                   
+                    $("#wb_bd_no").removeClass("bd_no");
+                    $("#wb_bd_no").addClass("bd_ok");
+                    $("#wb_bd_no").text('+ 绑定');
+                    $("#wb_bd_state").text('未绑定');
                 } else if (msg.success === false) {
                 	alert(msg.error);
                 }
             }
         });
 	}
+    //绑定微博
+    function bd_wb_type_add(id){
+	    //获取邮箱
+        var uemail = $('#username_email').val();
+        //获取登录方法
+		var url_type = window.location.href;
+        var act_type = url_type.split('act_type/')[1].substr(0, 1);
+		
+	    var url = "{:url('index/login/weibologin',['bd_type'=>'bd_type_id','uemail'=>'uemail_str','act_type'=>'act_type'])}";
+	    var str = url.replace('uemail_str',uemail);
+	    var res = str.replace('bd_type_id',id);
+	    var href = res.replace('act_type.html',act_type);
+	   	if(id == '0'){
+            window.location.href = href;
+		}
+	    
+	   
+	}
+	
 	$("#c_email").click(function () {
         window.location.href = "{:url('index/personal/cemail')}";
         if (navigator.userAgent.indexOf("MSIE") > 0) {

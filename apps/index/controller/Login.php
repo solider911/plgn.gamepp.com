@@ -129,23 +129,6 @@ class Login extends Controller {
                     Session::set('is_re_lo','0'); //否
                 }
 
-                $utype = input('utype');
-                if($utype == '0'){
-                    $user_info = Db::table('ys_login_account')
-                        ->where('user_account','=',$username)
-                        ->find();
-
-                    $data = array(
-                        'uid' => $user_info['user_account'],
-                        'header_url'=> '',
-                        'nickname'=>$user_info['nickname']
-                    );
-
-                    return json(['success'=>true,'utype'=>$utype,'data'=>$data]);
-                }
-
-
-
                 // 更新用户状态
                 Db::table('ys_login_account')
                     ->where('user_account','=',$username)
@@ -155,6 +138,22 @@ class Login extends Controller {
                     ->where('user_account','=',$username)
                     ->setField('user_last_login_time',date('Y-m-d H-i-s'));
 
+                //pc登录
+                $utype = input('utype');
+
+                if($utype == '0'){
+                    $user_info = Db::table('ys_login_account')
+                        ->where('user_account','=',$username)
+                        ->find();
+
+                    $data = array(
+                        'uid' => $user_info['user_account'],
+                        'header_url'=> '__IMG__/de_he_img.jpg',
+                        'nickname'=>$user_info['user_nickname']
+                    );
+
+                    return json(['success'=>true,'utype'=>$utype,'data'=>$data]);
+                }
 
                 //传入session 判断登陆
                 Session::set('username',$username);
@@ -186,18 +185,32 @@ class Login extends Controller {
 
     //微博oauth2.0授权登录
     public function weibologin(){
+	    //pc端登录类型
+	    $utype = input('utype');
+
+	    //获取当前邮箱
+	    $uemail = input('uemail');
+	    //个人中心绑定类型
+        $bd_type = input('bd_type');
+        //獲取登錄狀態
+        $act_type = input('act_type');
+
         //实例化微博oauth类 获取授权窗口
         $oAuth = new Oauth('2067469895','5b3bd631e64e4c051ee3d3d57bbd5dcd');
-        $code_url = $oAuth->getAuthorizeURL("http://plgn.gamepp.com/?s=index/login/weiboLoginCallback");
-        echo <<<EOF
-        <script type='text/javascript'>
-        window.location.href="$code_url";
-        </script>
-EOF;
+
+        //微博绑定
+        if($bd_type == '0'){
+            $code_url = $oAuth->getAuthorizeURL("http://plgn.gamepp.com/?s=index/login/weiboLoginCallback/bd_type/{$bd_type}/uemail/{$uemail}/act_type/{$act_type}");
+            return header("Location:".$code_url);
+        }
+
+        $code_url = $oAuth->getAuthorizeURL("http://plgn.gamepp.com/?s=index/login/weiboLoginCallback/utype/{$utype}");
+        return header("Location:".$code_url);
     }
 
 
-    public function weiboLoginCallback(){
+    public function weiboLoginCallback(Request $request){
+
         //实例化微博oAuth类
         $oAuth = new Oauth('2067469895','5b3bd631e64e4c051ee3d3d57bbd5dcd');
         //直接使用微博aouth dome代码
@@ -253,12 +266,37 @@ EOF;
                         ->where('user_wb_id','=',$returnUserInfo['user_wb_id'])
                         ->setField('user_wb_last_time',date('Y-m-d H:i:s'));
 
+                    //判断客户端登录
+                    $utype = input('utype');
+                    if ($utype == '1'){
+                        $user_info = Db::table('ys_login_wb')
+                            ->where('user_wb_id','=',$returnUserInfo['user_wb_id'])
+                            ->find();
+
+                        $data = array(
+                            'uid' => $user_info['user_wb_openid'],
+                            'header_url'=> $user_info['user_wb_image_url'],
+                            'nickname'=>$user_info['user_wb_name']
+                        );
+
+                        return json(['success'=>true,'utype'=>$utype,'data'=>$data]);
+                    }
+
                     Session::set('user_wb_id',$returnUserInfo['user_wb_id']);
                     $url = "http://plgn.gamepp.com/?s=/index/personal/my_info/act_type/1";
                     return header("Location:".$url);
 
                 }else{
-
+                    $bd_info = $request->param();
+                    //微博绑定
+                    if($bd_info['bd_type'] == '0'){
+                        //获取user_wb_id
+                        Db::table('ys_login_account')
+                        ->where('user_account','=',$bd_info['uemail'])
+                        ->setField('user_wb_id',$returnUserInfo['user_wb_id']);
+                        $url = "http://plgn.gamepp.com/index.php?s=/index/personal/my_info/act_type/{$bd_info['act_type']}";
+                        return header("Location:".$url);
+                    }
                     //用户没有绑定邮箱 获取自增id
                     Session::set('wbcode',$returnUserInfo['user_wb_id']);
                     //第一次没有邮箱 绑定邮箱
@@ -272,8 +310,25 @@ EOF;
                 $userInfo['user_wb_openid']    = $user_message['id'];   //openid
                 $userInfo['user_wb_auth_time'] = date('Y-m-d H:i:s'); //开始授权时间
                 $userInfo['user_wb_last_time'] = date('Y-m-d H:i:s'); //最后登录时间
-                $data = Db::table('ys_login_wb')->insert($userInfo);
 
+
+                $bd_info = $request->param();
+                //微博绑定
+                if($bd_info['bd_type'] == '0'){
+                    //存入新數據
+                    $data = Db::table('ys_login_wb')->insert($userInfo);
+
+                    $user_info = Db::table('ys_login_wb')
+                            ->where('user_wb_openid','=',$userInfo['user_wb_openid'])
+                            ->find();
+                        //关联
+                    Db::table('ys_login_account')
+                            ->where('user_account','=',$bd_info['uemail'])
+                            ->setField('user_wb_id', $user_info['user_wb_id']);
+                    $url = "http://plgn.gamepp.com/index.php?s=/index/personal/my_info/act_type/{$bd_info['act_type']}";
+                    return header("Location:".$url);
+                }
+                $data = Db::table('ys_login_wb')->insert($userInfo);
                 if ($data == true){
                     //获取自增id
                     Session::set('wbcode',$returnUserInfo['user_wb_id']);
@@ -442,12 +497,17 @@ EOF;
             //产生盐值
             $salt  = substr(time(),-6);
 
+            //随机昵称
+            $rand_nickname  = "plgn_".mt_rand(10000,99999).substr(time(),-4);
+            $data['user_nickname'] = $rand_nickname;
+
             $data['user_account'] = $info['user_email'];
             $data['user_pwd'] = md5($info['wbrand'].$salt);
             $data['user_salt'] =$salt;
             $data['user_wb_id'] = $info['wbcode'];
             $data['user_create_time'] = date('Y-m-d H:i:s');
             $data['user_is_act'] = '1';
+
 
             //获取密码长度,判断邮箱是否存在
 
@@ -495,6 +555,7 @@ EOF;
         }
 
     }
+
 
     //绑定成功页面
     public function  bd_ok(){

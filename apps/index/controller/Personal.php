@@ -21,7 +21,7 @@ class Personal extends Base {
 
 
        //获取用户数据
-        $nickname = Db::table('ys_login_account')
+        $user_data = Db::table('ys_login_account')
             ->where('user_account','=',$username)
             ->find();
         if($username == null){
@@ -30,25 +30,20 @@ class Personal extends Base {
         }else{
             $data['is_login'] = '1'; //1为登录
             //判断用户是否完善   判断用户是否完善
-            if($nickname['user_nickname'] != null){
+            if($user_data['user_nickname'] != null){
                 $data['ws_info'] = '1';
                 //用户性别
-                $data['user_sex'] = $nickname['user_sex'];
+                $data['user_sex'] = $user_data['user_sex'];
             }else{
                 $data['ws_info'] = '0';
-                $data['user_sex'] = $nickname['user_sex'];
+                $data['user_sex'] = $user_data['user_sex'];
             }
         }
 
         //用户普通登录
         if($type['act_type'] == '0'){
             $data['header_img'] = "__IMG__/de_he_img.jpg";  //默认头像
-            //判断用户有没有昵称
-            if($nickname['user_nickname'] != null){
-                $data['nickname'] = $nickname['user_nickname'];
-            }else{
-                $data['nickname'] = '';
-            }
+            $data['nickname'] = $user_data['user_nickname'];
         }
 
        //1为微博绑定邮箱
@@ -65,40 +60,31 @@ class Personal extends Base {
                ->join('ys_login_account a','w.user_wb_id = a.user_wb_id')
                ->where('w.user_wb_id','=','a.user_account_id')
                ->find();
-           if($nickname['user_nickname'] != null){
+
                $data['nickname'] = $nickname['user_nickname'];
                $data['user_sex'] = $nickname['user_sex'];
-           }else{
-               $data['nickname'] = $nickname[''];
-               $data['user_sex'] = $nickname['user_sex'];
-           }
        }
 
-
        //判断第三方是否绑定
-       $bd_type = DB::table('ys_login_account')
-           ->where('user_account','=',Session::get('username'))
-           ->find();
-
         //预设为1
         $data['user_wb_id'] = '1';
         $data['user_qq_id'] = '1';
         $data['user_wx_id'] = '1';
         $data['user_steam_id'] = '1';
         //微博
-        if($bd_type['user_wb_id'] == null){
+        if($user_data['user_wb_id'] == null){
             $data['user_wb_id'] = '0';
         }
         //qq
-        if($bd_type['user_qq_id'] == null){
+        if($user_data['user_qq_id'] == null){
             $data['user_qq_id'] = '0';
         }
         //微信
-        if($bd_type['user_wx_id'] == null){
+        if($user_data['user_wx_id'] == null){
             $data['user_wx_id'] = '0';
         }
         //steam
-        if($bd_type['user_steam_id'] == null){
+        if($user_data['user_steam_id'] == null){
             $data['user_steam_id'] = '0';
         }
 
@@ -291,17 +277,18 @@ class Personal extends Base {
             $user_account = Db::table('ys_login_account')
                 ->where('user_account','=',$username_email)
                 ->find();
+
             if($user_account['user_wb_id'] != null){
-                $wb_del = Db::table('ys_login_wb')
+                $wb_del = Db::table('ys_login_account')
                     ->where('user_wb_id','=',$user_account['user_wb_id'])
-                    ->setField('user_wb_id','');
+                    ->setField('user_wb_id',null);
                 if($wb_del == true){
                     return json(['success'=>true]);
                 }else{
-                    return json(['success'=>false,'error'=>'取消关联失败']);
+                    return json(['success'=>false,'error'=>'取消关联失败,刷新页面重试']);
                 }
             }else{
-                return json(['success'=>false,'error'=>'取消关联失败']);
+                return json(['success'=>false,'error'=>'取消关联失败,刷新页面重试']);
             }
 
         }

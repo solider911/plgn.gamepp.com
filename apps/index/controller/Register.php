@@ -90,14 +90,16 @@ class Register extends Controller{
 
                 //邮箱激活随机码
                 $user_active_code = substr(md5($username.time()),-15);
-
+                //随机昵称
+                $rand_nickname  = "plgn_".mt_rand(10000,99999).substr(time(),-4);
                 //注册信息
                 $data = array(
                     'user_account'=>$username,
                     'user_pwd'=>md5($pwd.$salt),
                     'user_salt'=>$salt,
                     'user_create_time'=>date('Y-m-d H:i:s'),
-                    'user_active_code'=>$user_active_code
+                    'user_active_code'=>$user_active_code,
+                    'user_nickname'=>$rand_nickname
                 );
 
                 $reg = Db::table('ys_login_account')->insert($data);
