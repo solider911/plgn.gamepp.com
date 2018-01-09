@@ -17,4 +17,8 @@ return [
         '__JS__'     => '/public/static/index/js',
         '__IMG__' => '/public/static/index/images',
     ),
+
+    'WB_KEY'=>'2067469895',
+    'WB_SECRET'=>'5b3bd631e64e4c051ee3d3d57bbd5dcd',
+
 ];

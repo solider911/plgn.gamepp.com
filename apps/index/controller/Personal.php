@@ -13,22 +13,17 @@ use think\Session;
 use think\Url;
 url::root('/index.php?s=');
 class Personal extends Base {
-
-
-
-
-    
     //个人信息首页
     public function my_info(Request $request){
        //设定用户登录状态 act_type:
        $type = $request->param();
        $username =  Session::get('username');
 
+
        //获取用户数据
         $nickname = Db::table('ys_login_account')
             ->where('user_account','=',$username)
             ->find();
-
         if($username == null){
             $data['is_login'] = '0'; //0为没登录
             return $this->fetch();
@@ -47,16 +42,16 @@ class Personal extends Base {
 
         //用户普通登录
         if($type['act_type'] == '0'){
+            $data['header_img'] = "__IMG__/de_he_img.jpg";  //默认头像
             //判断用户有没有昵称
             if($nickname['user_nickname'] != null){
                 $data['nickname'] = $nickname['user_nickname'];
-                $data['header_img'] = "__IMG__/de_he_img.jpg";  //默认头像
             }else{
                 $data['nickname'] = '';
             }
         }
 
-       //1为微博绑定 用昵称或者邮箱
+       //1为微博绑定邮箱
        if($type['act_type'] == '1'){
             //获取头像
            $header_img = Db::table('ys_login_wb')
@@ -71,10 +66,10 @@ class Personal extends Base {
                ->where('w.user_wb_id','=','a.user_account_id')
                ->find();
            if($nickname['user_nickname'] != null){
-               Session::set('nickname',$nickname['user_nickname']);
+               $data['nickname'] = $nickname['user_nickname'];
                $data['user_sex'] = $nickname['user_sex'];
            }else{
-               Session::set('nickname',$nickname['user_account']);
+               $data['nickname'] = $nickname[''];
                $data['user_sex'] = $nickname['user_sex'];
            }
        }
@@ -299,12 +294,14 @@ class Personal extends Base {
             if($user_account['user_wb_id'] != null){
                 $wb_del = Db::table('ys_login_wb')
                     ->where('user_wb_id','=',$user_account['user_wb_id'])
-                    ->delete();
+                    ->setField('user_wb_id','');
                 if($wb_del == true){
                     return json(['success'=>true]);
                 }else{
-                    return json(['success'=>false]);
+                    return json(['success'=>false,'error'=>'取消关联失败']);
                 }
+            }else{
+                return json(['success'=>false,'error'=>'取消关联失败']);
             }
 
         }

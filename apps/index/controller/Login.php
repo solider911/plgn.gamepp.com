@@ -90,32 +90,19 @@ class Login extends Controller {
                 }
 
                 //判断用户是否被激活
-                $free = Db::table('ys_login_account')
-                    ->where('user_account','=',$username)
-                    ->field('user_is_act')
-                    ->find();
-                if($free['user_is_act'] != '1'){
+                if($user['user_is_act'] != '1'){
                     return json(['success'=>false,'error'=>'203']); //用户未激活
                 }
 
                 //判断用户是否被冻结
-                $free = Db::table('ys_login_account')
-                    ->where('user_account','=',$username)
-                    ->field('user_is_free')
-                    ->find();
-                if($free['user_is_free'] != '1'){
+                if($user['user_is_free'] != '1'){
                     return json(['success'=>false,'error'=>'204']); //用户被冻结
                 }
 
                 //获取盐值
-                $salt = Db::table('ys_login_account')
-                    ->where('user_account','=',$form_data['user_account'])
-                    ->field('user_salt')
-                    ->find();
-
+                $salt = $user['user_salt'];
                 //密码盐值加密
                 $pwd_sa = md5($pwd.$salt);
-
                 //判断密码是否正确
                 $check_pwd = Db::table('ys_login_account')
                     ->where('user_account','=',$username)
@@ -142,6 +129,23 @@ class Login extends Controller {
                     Session::set('is_re_lo','0'); //否
                 }
 
+                $utype = input('utype');
+                if($utype == '0'){
+                    $user_info = Db::table('ys_login_account')
+                        ->where('user_account','=',$username)
+                        ->find();
+
+                    $data = array(
+                        'uid' => $user_info['user_account'],
+                        'header_url'=> '',
+                        'nickname'=>$user_info['nickname']
+                    );
+
+                    return json(['success'=>true,'utype'=>$utype,'data'=>$data]);
+                }
+
+
+
                 // 更新用户状态
                 Db::table('ys_login_account')
                     ->where('user_account','=',$username)
@@ -151,6 +155,8 @@ class Login extends Controller {
                     ->where('user_account','=',$username)
                     ->setField('user_last_login_time',date('Y-m-d H-i-s'));
 
+
+                //传入session 判断登陆
                 Session::set('username',$username);
                 return json(['success'=>true]);
 
@@ -162,7 +168,6 @@ class Login extends Controller {
                 if($result_pwd !== true){
                     return json(['success'=>false,'error'=>'302','info'=>$result_pwd]);
                 }
-
             }
         }
     }
@@ -214,8 +219,7 @@ EOF;
             $uid_get = $oAuthResult->get_uid();
             //根据uid获取微博用户信息
             $user_message = $oAuthResult->show_user_by_id($uid_get['uid']);
-
-
+            
             //判断第三方是否登录过
             $returnUserInfo = Db::table('ys_login_wb')
                 ->where('user_wb_openid','=',$user_message['id'])
@@ -224,18 +228,13 @@ EOF;
             //第三方已经登录
             if ($returnUserInfo==true){
 
-                //将用户信息存入session
-                Session::set('username',$returnUserInfo['user_wb_name']);
-                Session::set('header_img',$returnUserInfo['user_wb_image_url']);
-
-                //获取用户才信息
+                //获取用户 是否绑定
                 $user_info = Db::table('ys_login_account')
                         ->where('user_wb_id','=',$returnUserInfo['user_wb_id'])
                         ->find();
 
                 //第三方不是首次登陆
                 if($user_info == true){
-
                     // 更新用户状态 账号更新
                     Db::table('ys_login_account')
                         ->where('user_account_id','=',$returnUserInfo['user_wb_id'])
@@ -254,14 +253,16 @@ EOF;
                         ->where('user_wb_id','=',$returnUserInfo['user_wb_id'])
                         ->setField('user_wb_last_time',date('Y-m-d H:i:s'));
 
+                    Session::set('user_wb_id',$returnUserInfo['user_wb_id']);
                     $url = "http://plgn.gamepp.com/?s=/index/personal/my_info/act_type/1";
                     return header("Location:".$url);
 
                 }else{
+
                     //用户没有绑定邮箱 获取自增id
                     Session::set('wbcode',$returnUserInfo['user_wb_id']);
                     //第一次没有邮箱 绑定邮箱
-                    $url = "http://plgn.gamepp.com/?s=index/login/bd_email1";
+                    $url = "http://plgn.gamepp.com/?s=index/login/bd_email1/wbcode/{$returnUserInfo['user_wb_id']}";
                     return Header("Location: $url");
                 }
             }else{
@@ -278,7 +279,7 @@ EOF;
                     Session::set('wbcode',$returnUserInfo['user_wb_id']);
 
                     //第一次没有邮箱 绑定邮箱
-                    $url = "http://plgn.gamepp.com/?s=index/login/bd_email1";
+                    $url = "http://plgn.gamepp.com/?s=index/login/bd_email1/wbcode/{$returnUserInfo['user_wb_id']}";
                     return Header("Location: $url");
                 }
             }
@@ -288,6 +289,7 @@ EOF;
     //发送验证邮箱
     public function bd_email1(Request $request){
         if($request->isAjax()){
+            $wb_info = Session::get('wbcode');
             $username = input('post.username');
             $check_rem = input('post.check_rem');
 
@@ -331,8 +333,6 @@ EOF;
                 $user_act['user_wb_act_code'] = $user_active_code;
                 $user_act['user_wb_act_code_time'] = time()+7200;
 
-                //获取微博表唯一id
-                $wb_info = Session::get('wbcode');
 
                 $act_email = Db::table('ys_login_wb')
                     ->where('user_wb_id','=',$wb_info)

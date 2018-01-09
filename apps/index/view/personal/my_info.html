@@ -80,7 +80,7 @@
 							<h3 style="color: #4D4D4D;font-family:'Microsoft yahei';font-size: 16px;"><b>个人信息设置</b></h3>
 							<div class="my_info_con">
 								<ul class="tabGroup_my">
-									<li class="tabGroup_my_li1">用户昵称&nbsp;&nbsp;&nbsp;<input type="text" name="nickname" id="nickname" value="{ $data['nickname']}">&nbsp;&nbsp; <tit id="error" style="color: #999;font-size: 13px">(用于游戏组队和勇士系统,不超过16个字符)</tit></li>
+									<li class="tabGroup_my_li1">用户昵称&nbsp;&nbsp;&nbsp;<input type="text" name="nickname" id="nickname" value="{$data['nickname']}">&nbsp;&nbsp; <tit id="error" style="color: #999;font-size: 13px">(用于游戏组队和勇士系统,不超过16个字符)</tit></li>
 									 {if condition="$data.user_sex eq 1"}
 									<li class="tabGroup_my_li2">性别 <input name="user_sex" type="radio" value="1" checked />&nbsp;&nbsp;男&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input name="user_sex" type="radio" value="0" />&nbsp;&nbsp;女</li>
 									{else/}
@@ -219,9 +219,9 @@
             success: function (msg) {
                 //要求服务器返回一个success成员,值为true
                 if (msg.success === true) {
-                    $('.bd_no').text('绑定');
+                   
                 } else if (msg.success === false) {
-                	alert(11111111);
+                	alert(msg.error);
                 }
             }
         });

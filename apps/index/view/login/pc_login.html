@@ -2,22 +2,18 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
+	<meta property="wb:webmaster" content="25f74ccdd3685c15" />
 	<title>登录</title>
 </head>
 <link rel="stylesheet" href="__CSS__/pc_pubg_login.css">
 <body>
-	<div class="header"><img src="__IMG__/logo.png" width="150px" style="margin-top: 10px"><a href="" class="back"><img src="__IMG__/btn_close.png" style="margin-top: 5px"></a><a href="#" class="back"><img src="__IMG__/btn_refresh.png" style="margin-top: 5px"></a></div>
+	<div class="header"><img src="__IMG__/logo.png" alt=""><a href="http://gamepp.com/chichken/chichken.html/" class="back">返回游戏官网页面</a></div>
 	<div class="reg_center_big">
 			<div class="reg_title">
 				<h3>登录</h3>
 				<form action="">
 					<div id="u" class="form-group">
-						{if condition="$data['rem'] eq 1"}
 		  				<input id="username" spellcheck=false class="form-control" name="username" type="text" size="18" required="" placeholder="" value="{$data['username']}">
-						{/if}
-						{if condition="$data['rem'] eq 0"}
-		  				<input id="username" spellcheck=false class="form-control" name="username" type="text" size="18" required="" placeholder="" >
-						{/if}
 		  				<span class="form-highlight"></span>
 		  				<span class="form-bar"></span>
 		  				<label for="username" class="float-label">邮箱</label>
@@ -25,12 +21,7 @@
 		  			</div>
 
 					<div id="p" class="form-group">
-		  				{if condition="$data['rem'] eq 1"}
 		  				<input id="password" class="form-control" spellcheck=false name="password" type="password" size="18" required="" value="{$data['pwd']}">
-						{/if}
-						{if condition="$data['rem'] eq 0"}
-		  				<input id="password" class="form-control" spellcheck=false name="password" type="password" size="18" required="">
-						{/if}
 		  				<span class="form-highlight"></span>
 		  				<span class="form-bar"></span>
 		  				<label for="password" class="float-label">密码</label>
@@ -74,7 +65,7 @@
 								</ul>
 
 							
-							<div class="reg_user"><a href="{:url('index/Register/index')}" style="color: #9A9BA2">注册账号></a></div>
+							<div class="reg_user"><a href="{:url('index/Register/index')}">注册账号</a></div>
 						</div>
 					</div>
 
@@ -160,14 +151,14 @@ $(document).ready(function () {
             }
             //设置ajax
             $.ajax({
-                url:'{:url("index/Login/login")}',
+                url:'{:url("index/Login/login",["utype"=>0])}',
                 data:{'username':username,'pwd':pwd,'keep_pwd':keep_pwd,'re_lo':re_lo},
                 dataType:'json',
                 type:'post',
                 success:function (msg) {
                     //要求服务器返回一个success成员,值为true
                     if(msg.success===true){
-                        alert('登录成功!');
+                        alert(msg.utype);
 
                     }else if(msg.success===false){
                         if(msg.error == '300'){

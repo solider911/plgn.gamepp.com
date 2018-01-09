@@ -1,0 +1,4 @@
+utype:0账号 1微博 2微信 3qq steam4
+uid: 账号 email     微博:openid    qq:openid  微信: ..................................
+头像:header_url
+nickname:默认 随机  用什么给什么昵称
