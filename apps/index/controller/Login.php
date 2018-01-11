@@ -8,9 +8,9 @@ namespace app\index\controller;
 
 use app\common\common\Email;
 use app\common\common\OAuthException;
-use app\common\common\QQ_LoginAction;
 use app\common\common\QQsdk;
 use think\Controller;
+use think\Cookie;
 use think\Db;
 use think\Request;
 use think\Session;
@@ -20,10 +20,11 @@ use think\Url;
 url::root('/index.php?s=');
 
 class Login extends Controller {
+
 	//登录页面
 	public function index(){
-	    if(Session::get('is_rem') !== '1'){
-            Session::set('is_rem','0');
+	    if(Cookie::get('is_rem') !== '1'){
+            Cookie::set('is_rem','0');
             Session::set('username',null);
             Session::set('password',null);
 
@@ -50,6 +51,7 @@ class Login extends Controller {
             $pwd = input('post.pwd');
             $keep_pwd = input('post.keep_pwd'); //0为没记住密码 1为记住密码
             $re_lo = input('post.re_lo'); //0为不自动登录 1为自动登录
+            $pwd_len = input('post.pwd_len');
 
             //数据验证
             $form_data = [
@@ -63,19 +65,15 @@ class Login extends Controller {
             ];
             $msg_user= [
                 'user_account.require' => '邮箱不能为空',
-                'user_account.max' => '邮箱最多18个字符',
-                'user_account.min' => '邮箱最少4个字符',
                 'user_account.email' => '邮箱格式不正确',
             ];
 
             //密码验证
             $rule_pwd = [
-                'user_pwd' => 'require|max:16|min:6'
+                'user_pwd' => 'require'
             ];
             $msg_pwd= [
                 'user_pwd.require' => '密码不能为空',
-                'user_pwd.max' => '密码长度为6-16字符',
-                'user_pwd.min' => '密码长度为6-16字符'
             ];
 
             //进行验证
@@ -83,6 +81,7 @@ class Login extends Controller {
             $result_pwd = $this->validate($form_data,$rule_pwd,$msg_pwd);  //密码
             //数据库验证 验证通过
             if($result_user === true && $result_pwd === true){
+
                 //判断用户是否存在
                 $user = Db::table('ys_login_account')
                     ->where('user_account','=',$username)
@@ -101,6 +100,11 @@ class Login extends Controller {
                     return json(['success'=>false,'error'=>'204']); //用户被冻结
                 }
 
+                if($pwd_len<6 || $pwd_len>16){
+                    return json(['success'=>false,'error'=>'304']);
+                }
+
+
                 //获取盐值
                 $salt = $user['user_salt'];
                 //密码盐值加密
@@ -114,21 +118,13 @@ class Login extends Controller {
                 if($check_pwd == null){
                     return json(['success'=>false,'error'=>'205']); //密码错误
                 }
-
                 //记住密码处理
                 if($keep_pwd == '1'){
-                    Session::set('is_rem','1');  //是否记住密码 是
+                    Cookie::set('is_rem','1');  //是否记住密码 是
                     Session::set('username',$username); //记录邮箱名
                     Session::set('password',$pwd);   //记住密码
                 }else{
                     Session::set('is_rem','0'); //否
-                }
-
-                //自动登录处理
-                if($re_lo == '1'){
-                    Session::set('is_re_lo','1'); //是
-                }else{
-                    Session::set('is_re_lo','0'); //否
                 }
 
                 // 更新用户状态
@@ -151,7 +147,7 @@ class Login extends Controller {
                         ->where('user_account','=',$username)
                         ->find();
                     return json(['success'=>true,'utype'=>$utype,'uid'=>$username,'token'=>$user_data['user_token'],'nickname'=>$user_data['user_nickname']
-,'header_url'=>'']);
+,'imgurl'=>'http://tvax3.sinaimg.cn/default/images/default_avatar_male_50.gif']);
                 }
 
                 //传入session 判断登陆
@@ -219,12 +215,12 @@ class Login extends Controller {
             $uid_get = $oAuthResult->get_uid();
             //根据uid获取微博用户信息
             $user_message = $oAuthResult->show_user_by_id($uid_get['uid']);
-            
+
+
             //判断第三方是否登录过
             $returnUserInfo = Db::table('ys_login_wb')
                 ->where('user_wb_openid','=',$user_message['id'])
                 ->find();
-
             //第三方已经登录
             if ($returnUserInfo==true){
 
@@ -256,17 +252,28 @@ class Login extends Controller {
                     //判断客户端登录
                     $utype = input('utype');
                     if ($utype == '1'){
+
+                        //用户数据
                         $user_info = Db::table('ys_login_wb')
                             ->where('user_wb_id','=',$returnUserInfo['user_wb_id'])
                             ->find();
 
-                        $data = array(
-                            'uid' => $user_info['user_wb_openid'],
-                            'header_url'=> $user_info['user_wb_image_url'],
-                            'nickname'=>$user_info['user_wb_name']
-                        );
+                        //token
+                        $add_token = Db::table('ys_login_account')
+                            ->where('user_wb_id','=',$user_info['user_wb_id'])
+                            ->setField('user_token',hash("sha1",$user_info['user_wb_openid'].time()));
 
-                        return json(['success'=>true,'utype'=>$utype,'data'=>$data]);
+                        //获取token
+                        $user_data = Db::table('ys_login_account')
+                            ->where('user_wb_id','=',$user_info['user_wb_id'])
+                            ->find();
+
+                        $data['uid'] = $user_info['user_wb_id'];
+                        $data['token'] = $user_data['user_token'];
+                        $data['nickname'] =$user_info['user_wb_name'];
+                        $data['utype'] = $utype;
+                        $data['imgurl'] = $user_info['user_wb_image_url'];
+                        return $this->pc_login_suc($data);
                     }
                     Session::set('username',$user_info['user_account']);
                     Session::set('user_wb_id',$returnUserInfo['user_wb_id']);
@@ -282,10 +289,9 @@ class Login extends Controller {
                         Db::table('ys_login_account')
                         ->where('user_account','=',$bd_info['uemail'])
                         ->setField('user_wb_id',$returnUserInfo['user_wb_id']);
-                        $url = "http://plgn.gamepp.com/index.php?s=/index/personal/my_info/act_type/{$bd_info['act_type']}";
+                        $url = "http://plgn.gamepp.com/?s=/index/personal/my_info/act_type/{$bd_info['act_type']}";
                         return header("Location:".$url);
                     }
-                    //用户没有绑定邮箱 获取自增id
                     Session::set('wbcode',$returnUserInfo['user_wb_id']);
                     //第一次没有邮箱 绑定邮箱
                     $url = "http://plgn.gamepp.com/?s=index/login/bd_email1/wbcode/{$returnUserInfo['user_wb_id']}";
@@ -299,11 +305,12 @@ class Login extends Controller {
                 $userInfo['user_wb_auth_time'] = date('Y-m-d H:i:s'); //开始授权时间
                 $userInfo['user_wb_last_time'] = date('Y-m-d H:i:s'); //最后登录时间
 
-
                 $bd_info = $request->param();
-                //微博绑定
+
+                $bd_info['bd_type'] = '';
+                //网页微博绑定
                 if($bd_info['bd_type'] == '0'){
-                    //存入新數據
+                    //存入新数据
                     $data = Db::table('ys_login_wb')->insert($userInfo);
 
                     $user_info = Db::table('ys_login_wb')
@@ -313,18 +320,19 @@ class Login extends Controller {
                     Db::table('ys_login_account')
                             ->where('user_account','=',$bd_info['uemail'])
                             ->setField('user_wb_id', $user_info['user_wb_id']);
-                    $url = "http://plgn.gamepp.com/index.php?s=/index/personal/my_info/act_type/{$bd_info['act_type']}";
+                    $url = "http://plgn.gamepp.com/?s=/index/personal/my_info/act_type/{$bd_info['act_type']}";
                     return header("Location:".$url);
                 }
 
-
                 $data = Db::table('ys_login_wb')->insert($userInfo);
+
+                $user_info = Db::table('ys_login_wb')
+                    ->where('user_wb_openid','=',$userInfo['user_wb_openid'])
+                    ->find();
                 if ($data == true){
-                    //获取自增id
-                    Session::set('wbcode',$returnUserInfo['user_wb_id']);
 
                     //第一次没有邮箱 绑定邮箱
-                    $url = "http://plgn.gamepp.com/?s=index/login/bd_email1/wbcode/{$returnUserInfo['user_wb_id']}";
+                    $url = "http://plgn.gamepp.com/?s=index/login/bd_email1/wbcode/{$user_info['user_wb_id']}";
                     return Header("Location: $url");
                 }
             }
@@ -333,10 +341,12 @@ class Login extends Controller {
 
     //发送验证邮箱
     public function bd_email1(Request $request){
+
         if($request->isAjax()){
-            $wb_info = Session::get('wbcode');
+
             $username = input('post.username');
             $check_rem = input('post.check_rem');
+
 
             //数据验证
             $form_data = [
@@ -367,43 +377,49 @@ class Login extends Controller {
                 $user_account = Db::table('ys_login_account')
                     ->where('user_account','=',$username)
                     ->find();
+
                 if($user_account['user_wb_id'] != null){
                     return json(['success'=>false,'error'=>'206']);
                 }
 
                 //邮箱激活随机码
-                $user_active_code = substr(md5($username.time()),-15);
+                $user_active_code = hash('sha1',$username.time());
 
                 //保存入库激活码
                 $user_act['user_wb_act_code'] = $user_active_code;
                 $user_act['user_wb_act_code_time'] = time()+7200;
 
 
-                $act_email = Db::table('ys_login_wb')
-                    ->where('user_wb_id','=',$wb_info)
-                    ->setField($user_act);
+                //获取wb_user_id
+                $user_wb_id = Session::get('wbcode');
 
+                $act_email = Db::table('ys_login_wb')
+                    ->where('user_wb_id','=',$user_wb_id)
+                    ->setField($user_act);
                 //调用邮箱类
                 if($act_email == true){
                     //随机密码
                     $pwd = mt_rand(10000000,99999999);
-
                     $email = new Email();
                     //判断邮箱是否存在  存在就不发送密码密码
                     $account = Db::table('ys_login_account')
                         ->where('user_account','=',$username)
                         ->find();
+
                     if($account['user_account'] != null && $account['user_wb_id'] == null){
-                        $pwd = mt_rand(1,10000);
-                        $confirm_url ="http://plgn.gamepp.com/?s=index/login/act_code/wbcode/{$wb_info}/uCode/{$user_active_code}/wbrand/{$pwd}/user_email/{$username}/act_bd_type/1";
+
+                        $wbrand = mt_rand(1,10000);
+                        $confirm_url ="http://plgn.gamepp.com/?s=index/login/act_code/wbcode/{$user_wb_id}/uCode/{$user_active_code}/wbrand/{$wbrand}/user_email/{$username}/act_bd_type/1";
                         $email->mail_certification($username,$confirm_url);
                     }
 
-                    $confirm_url ="http://plgn.gamepp.com/?s=index/login/act_code/wbcode/{$wb_info}/uCode/{$user_active_code}/wbrand/{$pwd}/user_email/{$username}/act_bd_type/1";
+
+                    $confirm_url ="http://plgn.gamepp.com/?s=index/login/act_code/wbcode/{$user_wb_id}/uCode/{$user_active_code}/wbrand/{$pwd}/user_email/{$username}/act_bd_type/1";
                     $email->mail_certification_bind($username,$confirm_url,$pwd);
 
                     if($email == true){
-                        return json(['success'=>true,'user_wb_id'=>$wb_info,'uCode'=>$user_active_code,'username'=>$username]);
+
+                        return json(['success'=>true,'user_wb_id'=>$user_wb_id,'uCode'=>$user_active_code,'username'=>$username]);
                     }
                 }
             }else{
@@ -433,7 +449,7 @@ class Login extends Controller {
             }
 
             //邮箱激活随机码
-            $user_active_code = substr(md5($username.time()),-15);
+            $user_active_code = hash("sha1",$username.time());
 
             //保存入库激活码
             $user_act['user_wb_act_code'] = $user_active_code;
@@ -460,6 +476,7 @@ class Login extends Controller {
     public function act_code(Request $request){
 	    //获取参数
         $info = $request->param();
+
         //act_type:1 微博 绑定未注册账号
         if($info['act_bd_type'] == '1'){
             //激活码验证
@@ -467,7 +484,6 @@ class Login extends Controller {
                 ->where('user_wb_id','=',$info['wbcode'])
                 ->where('user_wb_act_code','=',$info['uCode'])
                 ->find();
-
             if($act_code == null){
                 $url = "http://plgn.gamepp.com/?s=/index/login/bd_no";
                 return header("Location:".$url);
@@ -543,14 +559,49 @@ class Login extends Controller {
                 return header("Location:".$url);
             }
         }
-
     }
 
-
+    //微信回调地址
+    public function wxlogin(){
+        $AppID = 'wx34b8df32b5856692';
+        $AppSecret = '1dba5b7eab656a1c23448cc067519d90';
+        $callback  =  'http://plgn.gamepp.com/?s=/index/login/wxCallback'; //回调地址
+//微信登录
+        session_start();
+//-------生成唯一随机串防CSRF攻击
+        $state  = md5(uniqid(rand(), TRUE));
+        $_SESSION["wx_state"]    =   $state; //存到SESSION
+        $callback = urlencode($callback);
+        $wxurl = "https://open.weixin.qq.com/connect/qrconnect?appid=".$AppID."&redirect_uri={$callback}&response_type=code&scope=snsapi_login&state={$state}#wechat_redirect";
+        header("Location: $wxurl");
+    }
 
     //微信回调地址
     public function wxCallback(){
-        echo '微信回调地址';
+        if($_GET['state']!=$_SESSION["wx_state"]){
+            exit("5001");
+        }
+        $AppID = 'wx34b8df32b5856692';
+        $AppSecret = '1dba5b7eab656a1c23448cc067519d90';
+        $url='https://api.weixin.qq.com/sns/oauth2/access_token?appid='.$AppID.'&secret='.$AppSecret.'&code='.$_GET['code'].'&grant_type=authorization_code';
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+        curl_setopt($ch, CURLOPT_URL, $url);
+        $json =  curl_exec($ch);
+        curl_close($ch);
+        $arr=json_decode($json,1);
+//得到 access_token 与 openid
+        print_r($arr);
+        $url='https://api.weixin.qq.com/sns/userinfo?access_token='.$arr['access_token'].'&openid='.$arr['openid'].'&lang=zh_CN';
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+        curl_setopt($ch, CURLOPT_URL, $url);
+        $json =  curl_exec($ch);
+        curl_close($ch);
+        $arr=json_decode($json,1);
+print_r($arr);
     }
     //qq授权页面
     public function qqlogin(){
@@ -608,7 +659,16 @@ class Login extends Controller {
         return $this->fetch('pc_login');
     }
 
-    public function pc_login_check(){
-
+    //pc登录成功后
+    public function pc_login_suc($data = null){
+	    if($data == null){
+            $data['uid'] = input('uid');
+            $data['token'] = input('token');
+            $data['nickname'] = input('nickname');
+            $data['utype'] = input('utype');
+            $data['imgurl'] = 'http://tvax3.sinaimg.cn/default/images/default_avatar_male_50.gif';
+        }
+	    $this->assign('data',$data);
+        return $this->fetch('pc_login_suc');
     }
 }

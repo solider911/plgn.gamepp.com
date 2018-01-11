@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>登录成功</title>
+</head>
+<link rel="stylesheet" href="__CSS__/check_ok.css">
+<body>
+登录成功
+	<input type="hidden" name="uid" id="uid" value="{$data['uid']}">
+	<input type="hidden" name="token" id="token" value="{$data['token']}">
+	<input type="hidden" name="nickname" id="nickname" value="{$data['nickname']}">
+	<input type="hidden" name="utype" id="utype" value="{$data['utype']}">
+	<input type="hidden" name="imgurl" id="imgurl" value="{$data['imgurl']}">
+</body>
+
+<script type="text/javascript" src='__JS__/jquery.min.js'></script>
+<script>
+    //返回参数
+    function saveloginparam(){
+        var uid	= $('#uid').val();
+        var token	 = $('#token').val();
+        var nickname = $('#nickname').val();
+        var utype = $('#utype').val();
+        var imgurl = $('#imgurl').val();
+        window.external.saveloginparam(uid,token,nickname,utype,imgurl);
+    }
+
+    window.onload=function(){
+        saveloginparam();
+        window.external.closewindow();
+    }
+	
+	
+</script>
+</html>

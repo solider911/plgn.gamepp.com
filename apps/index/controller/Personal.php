@@ -43,7 +43,7 @@ class Personal extends Base {
 
         //用户普通登录
         if($type['act_type'] == '0'){
-            $data['header_img'] = "__IMG__/de_he_img.jpg";  //默认头像
+            $data['header_img'] = "__IMG__/de_he_img.png";  //默认头像
             $data['nickname'] = $user_data['user_nickname'];
         }
 
@@ -181,7 +181,7 @@ class Personal extends Base {
                 }
 
                 //邮箱激活随机码
-                $act['user_active_code'] = substr(md5($n_username.time()),-15);
+                $act['user_active_code'] = hash("sha1",$n_username.time());
                 //激活码有效时间
                 $act['user_act_code_time'] = time()+7200;
 
@@ -251,7 +251,7 @@ class Personal extends Base {
             ->setField('user_is_act_code','1');
 
         if($qr_email == true){
-            $url = "http://plgn.gamepp.com/index.php?s=/index/personal/cemail_ok_j";
+            $url = "http://plgn.gamepp.com/?s=/index/personal/cemail_ok_j";
             Header("Location:".$url);
         }
     }
@@ -372,9 +372,6 @@ class Personal extends Base {
 
     //退出
     public function logout(){
-        Session::set('username',null);
-        Session::set('password',null);
-        Session::set('is_rem','0');
         $url = "http://gamepp.com/chichken/youxijj.html";
         return Header("Location: $url");
     }

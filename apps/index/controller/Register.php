@@ -26,28 +26,33 @@ class Register extends Controller{
 
     //用户注册
 
-    /**
-     * @param \think\Request $request
-     *
-     * @return \think\response\Json
-     * author Fox
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\ModelNotFoundException
-     * @throws \think\exception\DbException
-     */
     public function register(Request $request){
         if($request->isAjax()){
             $username = input('post.username');
+            $nickname = input('post.nickname');
             $pwd = input('post.pwd');
             $pwd2 = input('post.pwd2');
             $check_rem = input('post.check_rem');
+            $pwd_len = input('post.pwd_len');
+
 
             //数据验证
             $form_data = [
                 'user_account'=>$username,
                 'user_pwd'=>$pwd,
-                'user_pwd2'=>$pwd
+                'user_pwd2'=>$pwd,
+                'user_nickname'=>$nickname
             ];
+            $rule_nick = [
+                'user_nickname' => 'require|max:8|min:4',
+            ];
+            $msg_nick = [
+                'user_nickname.require' => '昵称不能为空',
+                'user_nickname.max' => '昵称最多8个字符',
+                'user_nickname.min' => '昵称最少4个字符',
+            ];
+
+
             $rule_user = [
                 'user_account' => 'require|max:18|min:4|email',
             ];
@@ -59,23 +64,33 @@ class Register extends Controller{
             ];
 
             $rule_pwd = [
-                'user_pwd' => 'require|max:16|min:6',
+                'user_pwd'=>'require',
                 'user_pwd2'=>'confirm:user_pwd'
             ];
             $msg_pwd= [
                 'user_pwd.require' => '密码不能为空',
-                'user_pwd.max' => '密码长度为6-16字符',
-                'user_pwd.min' => '密码长度为6-16字符',
                 'user_pwd2.confirm' => '两次输入密码不一致',
             ];
 
             //进行验证
+            $result_nick = $this->validate($form_data,$rule_pwd,$msg_pwd);
+            $result_pwd = $this->validate($form_data,$rule_nick,$msg_nick);
             $result_user = $this->validate($form_data,$rule_user,$msg_user);
-            $result_pwd = $this->validate($form_data,$rule_pwd,$msg_pwd);
+            if($result_user === true && $result_pwd === true && $result_nick ===true){
+                if($pwd_len<6 || $pwd_len>16){
+                    return json(['success'=>false,'error'=>'306']);
+                }
 
-            if($result_user === true && $result_pwd === true){
                 if($check_rem != '1'){
                     return json(['success'=>false,'error'=>'204']);
+                }
+                //判断昵称是否存在
+                $user_nickname = Db::table('ys_login_account')
+                    ->where('user_nickname','=',$nickname)
+                    ->find();
+
+                if($user_nickname != null){
+                    return json(['success'=>false,'error'=>'308']);
                 }
                 //判断用户是否存在
                 $user_account = Db::table('ys_login_account')
@@ -84,25 +99,22 @@ class Register extends Controller{
                 if($user_account != null){
                     return json(['success'=>false,'error'=>'206']);
                 }
-
                 //产生盐值
                 $salt  = substr(time(),-6);
 
                 //邮箱激活随机码
-                $user_active_code = substr(md5($username.time()),-15);
-                //随机昵称
-                $rand_nickname  = "plgn_".mt_rand(10000,99999).substr(time(),-4);
+                $user_active_code = hash("sha1",$username.time());
                 //注册信息
                 $data = array(
+                    'user_nickname'=>$nickname,
                     'user_account'=>$username,
                     'user_pwd'=>md5($pwd.$salt),
                     'user_salt'=>$salt,
                     'user_create_time'=>date('Y-m-d H:i:s'),
                     'user_active_code'=>$user_active_code,
-                    'user_nickname'=>$rand_nickname
                 );
-
                 $reg = Db::table('ys_login_account')->insert($data);
+
                 if($reg == true){
                     $email = new Email();
                     $confirm_url ="http://plgn.gamepp.com/?s=index/register/email/username/{$username}/uCode/{$user_active_code}";
@@ -122,7 +134,9 @@ class Register extends Controller{
                 if($result_pwd !== true){
                     return json(['success'=>false,'error'=>'302','info'=>$result_pwd]);
                 }
-
+                if($result_nick !== true){
+                    return json(['success'=>false,'error'=>'304','info'=>$result_pwd]);
+                }
             }
         }
     }
@@ -131,17 +145,6 @@ class Register extends Controller{
     public function check_email(){
         return $this->fetch();
     }
-
-
-    /**
-     * @return mixed|string
-     * author Fox
-     * @throws \think\Exception
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\ModelNotFoundException
-     * @throws \think\exception\DbException
-     * @throws \think\exception\PDOException
-     */
 
     //邮箱激活
     public function email(Request $request){
@@ -155,7 +158,6 @@ class Register extends Controller{
             ->where('user_account','=',$username)
             ->where('user_active_code','=',$user_active_code)
             ->find();
-
         if($info == true) {
             $str  = Db::table('ys_login_account')
                 ->where('user_account','=',$username)
@@ -163,10 +165,17 @@ class Register extends Controller{
                 ->setField('user_is_act','1');
             if ($str == true) {
                 return $this->fetch('reg_ok');
+            }else{
+                return $this->fetch('reg_no');
             }
+        }else{
+            return $this->fetch('reg_no');
         }
     }
 
+public function reg_no(){
+        return $this->fetch();
+}
     //邮箱重新发送
     public function cx_email(Request $request){
         $data = $request->param();
@@ -175,7 +184,7 @@ class Register extends Controller{
         $user_active_code =$data['uCode'];
 
         //邮箱激活随机码
-        $cx_user_active_code = substr(md5($username.time()),-15);
+        $cx_user_active_code = hash("sha1",$username.time());
 
         $reg = Db::table('ys_login_account')
             ->where('user_account','=',$username)
@@ -189,8 +198,6 @@ class Register extends Controller{
                 $url = "http://plgn.gamepp.com/?s=index/register/check_email/username/{$username}/uCode/{$cx_user_active_code}";
                 header("Location:".$url);
             }
-        }else{
-            return '失败';
         }
     }
 

@@ -152,7 +152,6 @@ $(document).ready(function () {
                 success:function (msg) {
                     //要求服务器返回一个success成员,值为true
                     if(msg.success===true){
-                        console.log(msg.info);
                         $('#user_email').val(msg.username);
                         $('#uCode').val(msg.uCode);
                         $('#user_wb_id').val(msg.user_wb_id);

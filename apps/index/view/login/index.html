@@ -47,8 +47,8 @@
 						<div class="ligin_type">
 							其他登录方式:
 								<ul>
-									<li><a href="{:url('index/login/qqlogin',['utype'=>'2'])}"><img src="__IMG__/btn_qq.png" alt="QQ"></a></li>
-									<li><a href=""><img src="__IMG__/btn_wechat.png" alt="微信"></a></li>
+									<li><a href="{:url('index/login/qqlogin')}"><img src="__IMG__/btn_qq.png" alt="QQ"></a></li>
+									<li><a href="{:url('index/login/wxlogin')}"><img src="__IMG__/btn_wechat.png" alt="微信"></a></li>
 									<li><a href="{:url('index/login/weibologin')}"><img src="__IMG__/btn_weibo.png" alt="微博"></a></li>
 								</ul>
 
@@ -67,6 +67,7 @@
 	</div>
 </body>
 <script type="text/javascript" src='__JS__/jquery.min.js'></script>
+<script type="text/javascript" src="__JS__/md5.min.js"></script>
 <script type="text/javascript">
 $(document).ready(function () {
 
@@ -131,17 +132,17 @@ $(document).ready(function () {
         if(user_code() == true && pwd_code() == true){
             //前端验证成功,提交form表单信息给服务器存储
             var username = $('#username').val();
-            var pwd = $('#password').val();
+            var pwd = md5($('#password').val());
+            var pwd_len = password.val().length;
             if($('#rem').is(':checked')) {
                 var keep_pwd = $('#rem').val();
             }else{
                 var keep_pwd = '0';
             }
-
             //设置ajax
             $.ajax({
-                url:'{:url("index/Login/login")}',
-                data:{'username':username,'pwd':pwd,'keep_pwd':keep_pwd},
+                url:'{:url("index/Login/login",["utype"=>0])}',
+                data:{'username':username,'pwd':pwd,'keep_pwd':keep_pwd,'pwd_len':pwd_len},
                 dataType:'json',
                 type:'post',
                 success:function (msg) {

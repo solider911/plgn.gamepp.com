@@ -8,14 +8,13 @@
 <link rel="stylesheet" href="__CSS__/reset.css" />
 <link rel="stylesheet" href="__CSS__/home.css">
 <link rel="stylesheet" href="__CSS__/main.css" />
-<link rel="shortcut icon" href="__IMG__/favicon.ico" />
 <style type="text/css">
     .user_login_reg {
         width: 200px;
         height: 85px;
-        position: absolute;
+        float: right;
+		margin-right: -770px;
         right: 230px;
-        top: 0px;
         text-align: left;
         line-height: 85px;
         color: #55A4FF;
@@ -33,7 +32,7 @@
               <a class="logo" href="http://gamepp.com/" target="_blank" title="最好的免费游戏录像软件_硬件监控工具_游戏截图工具_游戏加加官网GamePP|FPS"><img alt="专业贴心好用的游戏加加" src="__IMG__/logo.gif" width="322" height="49"></a>
               <div class="g-hdmn" id="g-hdmn">
                 <a href="../index.html" target="_self">首页</a>
-        <div class="n">吃鸡助手</div>
+        <div class="n">超级助手</div>
                 <a href="../download/download.html" target="_self">下载中心</a>
                   <!--<a href="../patchfile/patchfile.html" target="_self">游戏运行库</a>-->
                 <a href="../log/log.html" target="_self">更新日志</a>
@@ -43,9 +42,10 @@
           </div>
             <div class="user_login_reg">
 				{if condition="$data.is_login eq 0"}
-               <a href="http://plgn.gamepp.com/index.php?s=/index/login/index.html">登录</a> | <a href="http://plgn.gamepp.com/index.php?s=/index/register/index.html">注册</a>
+               <a href="http://plgn.gamepp.com/?s=/index/login/index.html">登录</a> | <a href="http://plgn.gamepp.com/?s=/index/register/index.html">注册</a>
 				{else/}
 				<img src="{$data['header_img']}" style="width: 35px;height: 35px; float: left;margin-top: 23px;border-radius: 50%">
+				&nbsp;&nbsp;
 				<text style="color: #3D3D3D">{$data['nickname']}</text>
 				<a href="{:url('index/personal/logout')}">退出</a>
 				{/if}
@@ -417,102 +417,4 @@
         document.getElementById("l" + n).style.display = '';
     }
 </script>
-<!-- JS只需改变className（以下示例仅作参考）： -->
-<script type="text/javascript">
-(function (_slides) {
-    each(_slides, function (_slide, i) {
-        var _ctrls = _slide.getElementsByTagName('i');
-        var _lists = _slide.getElementsByTagName('li');
-        each(_ctrls, function (_ctrl, i) {
-            _ctrl.onclick = function () {
-                each(_lists, function (_list, i) {
-                    delClass(_list, "z-crt");
-                });
-                each(_ctrls, function (_ctrl, i) {
-                    delClass(_ctrl, "z-crt");
-                });
-                addClass(_lists[i], "z-crt");
-                addClass(_ctrls[i], "z-crt");
-            }
-        });
-    });
-
-    function hasClass(_object, _clsname) {
-        var _clsname = _clsname.replace(".", "");
-        var _sCls = " " + (_object.className) + " ";
-        return (_sCls.indexOf(" " + _clsname + " ") != -1) ? true : false;
-    }
-
-    function toClass(_str) {
-        var _str = _str.toString();
-        _str = _str.replace(/(^\s*)|(\s*$)/g, "");
-        _str = _str.replace(/\s{2,}/g, " ");
-        return _str;
-    }
-
-    function addClass(_object, _clsname) {
-        var _clsname = _clsname.replace(".", "");
-        if (!hasClass(_object, _clsname)) {
-            _object.className = toClass(_object.className + (" " + _clsname));
-        }
-    }
-
-    function delClass(_object, _clsname) {
-        var _clsname = _clsname.replace(".", "");
-        if (hasClass(_object, _clsname)) {
-            _object.className = toClass(_object.className.replace(new RegExp("(?:^|\\s)" + _clsname + "(?=\\s|$)", "g"), " "));
-        }
-    }
-
-    function each(_objects, _fn) {
-        for (var i = 0, len = _objects.length; i < len; i++) {
-            _fn(_objects[i], i);
-        }
-    }
-})(document.getElementsByTagName('div'));
-</script>
-<script type="text/javascript">
-        function changetext() {
-            $("#bf").show();
-            $('#bg').hide();
-            $('.two').removeAttr("id");
-            $('.one').attr('id', "bt");
-        }
-
-        function changetexts(e) {
-            $("#bg").show();
-            $('#bf').hide();
-            $('#bt').removeAttr("id");
-            $('.one').removeAttr("id");
-            $('.two').attr('id', "bt");
-        }
-</script>
-<div style="top: 180px;right: 30px;position: fixed;">
-<script type="text/javascript">document.write('<iframe width="150" height="249" frameborder="0" scrolling="no" src="http://widget.weibo.com/relationship/bulkfollow.php?language=zh_cn&uids=5638986757&wide=1&color=C2D9F2,FFFFFF,0082CB,666666&showtitle=1&showinfo=1&sense=0&verified=1&count=1&refer=' + encodeURIComponent(location.href) + '&dpc=1"></iframe>')</script>
-
-</div>
-<div style="display:none;">
-<script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");
-document.write(unescape("%3Cspan id='cnzz_stat_icon_1255678423'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s4.cnzz.com/stat.php%3Fid%3D1255678423' type='text/javascript'%3E%3C/script%3E"));</script>
-<script src="/Public/Js/Jquery/jquery.js"></script>
-            <script src="/Public/Js/Jquery/jquery.scrollTo.js"></script>
-    <!--<script src="/Public/Js/home.js"></script>-->
-            <script type="text/javascript">
-                $(document).ready(function () {
-
-                    $(".area").hover(function () {
-
-                            $(this).find(".qq").show(100);
-                        }
-
-                        ,
-                        function () {
-
-                            $(this).find(".qq").hide(100);
-
-                        });
-
-                });
-                
-            </script>
 </html>

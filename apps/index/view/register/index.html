@@ -11,6 +11,14 @@
 			<div class="reg_title">
 				<h3>注册</h3>
 				<form action="">
+					<div id="n" class="form-group">
+		  				<input id="nickname" spellcheck=false class="form-control" name="nickname" type="text" size="18" required="" placeholder="">
+		  				<span class="form-highlight"></span>
+		  				<span class="form-bar"></span>
+		  				<label for="nickname" class="float-label">昵称</label>
+		  				<erroru id="errorn"></erroru>
+		  			</div>
+					
 					<div id="u" class="form-group">
 		  				<input id="username" spellcheck=false class="form-control" name="username" type="text" size="18" required="" placeholder="">
 		  				<span class="form-highlight"></span>
@@ -58,13 +66,16 @@
 	</div>
 </body>
 <script type="text/javascript" src='__JS__/jquery.min.js'></script>
+<script type="text/javascript" src="__JS__/md5.min.js"></script>
 <script type="text/javascript">
 $(document).ready(function () {
-    var username = $('#username'), password = $('#password'),password2 = $('#password2'), erroru = $('erroru'), errorp = $('errorp'), errorp2 = $('errorp2'),submit = $('#submit'), udiv = $('#u'), pdiv = $('#p'),pdiv2 = $('#p2'),rdiv = $('#r');
+    var nickname = $('#nickname'), username = $('#username'), password = $('#password'),password2 = $('#password2'), errorn = $('errorn'), erroru = $('erroru'), errorp = $('errorp'), errorp2 = $('errorp2'),submit = $('#submit'),ndiv = $('#n'), udiv = $('#u'), pdiv = $('#p'),pdiv2 = $('#p2'),rdiv = $('#r');
+    nickname.blur(function () {
+        nick_code();
+    });
     username.blur(function () {
         user_code();
     });
-
     password.blur(function () {
         pwd_code();
     });
@@ -76,7 +87,30 @@ $(document).ready(function () {
             pdiv2.removeAttr('errr');
         }
     });
+    
+    function nick_code(){
+        if (nickname.val() == '') {
+            ndiv.attr('errr', '');
+            return $('#errorn').text('昵称不能为空');
+        }else{
+            ndiv.removeAttr('errr');
+        }
 
+        if (nickname.val().length > 8) {
+            ndiv.attr('errr', '');
+            return $('#errorn').text('昵称最多8个字符');
+        }else{
+            ndiv.removeAttr('errr');
+        }
+        if (nickname.val().length < 4) {
+            ndiv.attr('errr', '');
+            return $('#errorn').text('昵称最少4个字符');
+        }else{
+            ndiv.removeAttr('errr');
+        }
+        return true;
+	}
+    
     function user_code(){
         if (username.val() == '') {
             udiv.attr('errr', '');
@@ -120,12 +154,11 @@ $(document).ready(function () {
         } else {
             pdiv.removeAttr('errr');
         }
-
         return true;
     }
     submit.on('click', function (event) {
         event.preventDefault();
-        if(user_code() == true && pwd_code() == true){
+        if(user_code() == true && pwd_code() == true && nick_code() == true){
             if (password.val() !== password2.val()) {
                 pdiv2.attr('errr', '');
                 return $('#errorp2').text('两次输入密码不一致');
@@ -140,16 +173,17 @@ $(document).ready(function () {
                 var check_rem = '1';
             }
             //前端验证成功,提交form表单信息给服务器存储
+            var nickname = $('#nickname').val();
             var username = $('#username').val();
-            var pwd = $('#password').val();
-            var pwd2 = $('#password2').val();
-            
-            
-
+            var pwd = md5($('#password').val());
+            var pwd2 = md5($('#password2').val());
+            var pwd_len = password.val().length;
+			
+			
             //设置ajax
             $.ajax({
                 url:'{:url("index/Register/register")}',
-                data:{'username':username,'pwd':pwd,'pwd2':pwd2,'check_rem':check_rem},
+                data:{'nickname':nickname,'username':username,'pwd':pwd,'pwd2':pwd2,'check_rem':check_rem,'pwd_len':pwd_len},
                 dataType:'json',
                 type:'post',
                 success:function (msg) {
@@ -170,6 +204,14 @@ $(document).ready(function () {
                             pdiv.attr('errr', '');
                             $('#errorp').text(msg.info);
                         }
+                        if(msg.error == '304'){
+                            ndiv.attr('errr', '');
+                            $('#errorn').text(msg.info);
+                        }
+                        if(msg.error == '306'){
+                            pdiv.attr('errr', '');
+                            $('#errorp').text('密码长度为6-16字符');
+                        }
                         if(msg.error == '204'){
                             return $('#errorr').show()
 						}
@@ -180,6 +222,10 @@ $(document).ready(function () {
                         if(msg.error == '208'){
                             udiv.attr('errr', '');
                             return $('#erroru').text('注册异常,请稍后重试');
+                        }
+                        if(msg.error == '308'){
+                            ndiv.attr('errr', '');
+                            $('#errorn').text('昵称已被使用');
                         }
                     }
                 }
