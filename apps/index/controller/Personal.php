@@ -7,19 +7,20 @@
 namespace app\index\controller;
 use app\common\Base;
 use app\common\common\Email;
+use think\Cookie;
 use think\Db;
 use think\Request;
 use think\Session;
 use think\Url;
 url::root('/index.php?s=');
 class Personal extends Base {
+
     //个人信息首页
     public function my_info(Request $request){
        //设定用户登录状态 act_type:
        $type = $request->param();
        $username =  Session::get('username');
-
-
+       //dump($username);return;
        //获取用户数据
         $user_data = Db::table('ys_login_account')
             ->where('user_account','=',$username)
@@ -303,6 +304,7 @@ class Personal extends Base {
         $y_pwd = input('post.y_pwd');
         $pwd = input('post.pwd');
         $pwd2 = input('post.pwd2');
+        $pwd_len = input('post.$pwd_len');
 
 
         //数据验证
@@ -311,13 +313,11 @@ class Personal extends Base {
             'user_pwd2'=>$pwd2
         ];
         $rule_pwd = [
-            'user_pwd' => 'require|max:16|min:6',
+            'user_pwd' => 'require',
             'user_pwd2'=>'confirm:user_pwd'
         ];
         $msg_pwd= [
             'user_pwd.require' => '密码不能为空',
-            'user_pwd.max' => '密码长度为6-16字符',
-            'user_pwd.min' => '密码长度为6-16字符',
             'user_pwd2.confirm' => '两次输入密码不一致',
         ];
         //进行验证
@@ -326,6 +326,9 @@ class Personal extends Base {
 
 
         if($result_pwd == true){
+            /*if($pwd_len < 6 || $pwd_len > 16){
+                return json(['success'=>false,'error'=>'208']); //密码错误
+            }*/
             $username = Session::get('username');
 
             //核对用户
@@ -336,7 +339,7 @@ class Personal extends Base {
                 ->find();
             //转换成加密密码
             $z_pwd = md5($y_pwd.$salt['user_salt']);
-
+            
             $check_pwd = Db::table('ys_login_account')
                 ->where('user_account','=',$username)
                 ->where('user_pwd','=',$z_pwd)

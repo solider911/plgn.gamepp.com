@@ -48,7 +48,7 @@ class Register extends Controller{
             ];
             $msg_nick = [
                 'user_nickname.require' => '昵称不能为空',
-                'user_nickname.max' => '昵称最多8个字符',
+                'user_nickname.max' => '昵称最多64个字符',
                 'user_nickname.min' => '昵称最少4个字符',
             ];
 

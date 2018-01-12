@@ -96,7 +96,7 @@ class Gbpwd extends Controller {
             //获取邮件激活信息
             $user_active_code =$data['uCode'];
            $username = $data['username'];
-
+           
 
             $pwd = input('post.pwd');
             $pwd2 = input('post.pwd2');

@@ -3,13 +3,10 @@
 <head>
 	<meta charset="UTF-8">
 	<meta property="wb:webmaster" content="25f74ccdd3685c15" />
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=0" name="viewport" />
 	<title>登录</title>
 </head>
 <link rel="stylesheet" href="__CSS__/pc_pubg_login.css">
 <body>
-	<div class="header"><img src="__IMG__/logo.png" alt=""><a href="http://gamepp.com/chichken/chichken.html/" class="back">返回游戏官网页面</a></div>
 	<div class="reg_center_big">
 			<div class="reg_title">
 				<h3>登录</h3>
@@ -50,7 +47,7 @@
 						<label for="re_lo">自动登录</label>
 				
 					
-					<a href="{:url('index/gbpwd/index')}" style="color: #666;float:right;margin-right: 2px;text-decoration: none;font-size: 13px;margin-top: 2px;">忘记密码?</a>
+					<a href="javascript:void(0)" onclick="getpwd()" style="color: #666;float:right;margin-right: 2px;text-decoration: none;font-size: 13px;margin-top: 2px;">忘记密码?</a>
 					</div>
 
 					<div class="form-group">
@@ -61,22 +58,40 @@
 						<div class="ligin_type">
 							其他登录方式:
 								<ul>
-									<li><a href="{:url('index/login/qqlogin',['utype'=>'2'])}"><img src="__IMG__/btn_qq.png" alt="QQ"></a></li>
-									<li><a href=""><img src="__IMG__/btn_wechat.png" alt="微信"></a></li>
-									<li><a href="{:url('index/login/weibologin',['utype'=>'1'])}"><img src="__IMG__/btn_weibo.png" alt="微博"></a></li>
+									<li style="border-color:#000"><a href="{:url('index/login/qqlogin',['utype'=>'2'])}" onclick="onclogin()"><img src="__IMG__/btn_qq.png" alt="QQ"></a></li>
+									<li><a href="{:url('index/login/wxlogin',['utype'=>'3'])}" onclick="onclogin()"><img src="__IMG__/btn_wechat.png" alt="微信"></a></li>
+									<li><a href="{:url('index/login/weibologin',['utype'=>'1'])}" onclick="onclogin()"><img src="__IMG__/btn_weibo.png" alt="微博"></a></li>
 								</ul>
 
 							
-							<div class="reg_user"><a href="{:url('index/Register/index')}">注册账号</a></div>
+							<div class="reg_user"><a href="javascript:void(0)" onclick="register_url()">注册账号</a></div>
 						</div>
 					</div>
-
 				</form>
 			</div>
 	</div>
 </body>
 <script type="text/javascript" src='__JS__/jquery.min.js'></script>
+<script type="text/javascript" src="__JS__/md5.min.js"></script>
 <script type="text/javascript">
+	//忘记密码
+	function getpwd(){
+        window.external.openurl("http://plgn.gamepp.com/?s=/index/gbpwd/index");
+	}
+	
+	//第三方登录
+    function onclogin(){
+        window.external.runotherlogin();
+
+    }
+	//跳转链接
+	function register_url(){
+        window.external.openurl("http://plgn.gamepp.com/?s=/index/register/index");
+    }
+    //返回参数
+    function saveloginparam(uid,token,nickname,utype,imgurl){
+        window.external.saveloginparam(uid,token,nickname,utype,imgurl);
+	}
 $(document).ready(function () {
 
     var username = $('#username'), password = $('#password'),erroru = $('erroru'), errorp = $('errorp'),submit = $('#submit'), udiv = $('#u'), pdiv = $('#p');
@@ -140,7 +155,8 @@ $(document).ready(function () {
         if(user_code() == true && pwd_code() == true){
             //前端验证成功,提交form表单信息给服务器存储
             var username = $('#username').val();
-            var pwd = $('#password').val();
+            var pwd = md5($('#password').val());
+            var pwd_len = password.val().length;
             if($('#rem').is(':checked')) {
                 var keep_pwd = $('#rem').val();
             }else{
@@ -154,14 +170,28 @@ $(document).ready(function () {
             //设置ajax
             $.ajax({
                 url:'{:url("index/Login/login",["utype"=>0])}',
-                data:{'username':username,'pwd':pwd,'keep_pwd':keep_pwd,'re_lo':re_lo},
+                data:{'username':username,'pwd':pwd,'keep_pwd':keep_pwd,'re_lo':re_lo,'pwd_len':pwd_len},
                 dataType:'json',
                 type:'post',
                 success:function (msg) {
                     //要求服务器返回一个success成员,值为true
                     if(msg.success===true){
-                        console.log(msg);
+                        var url = "{:url('index/Login/pc_login_suc',['uid'=>'msg.uid','token'=>'msg.token','nickname'=>'msg.nickname','utype'=>'msg.utype'])}";
+                        window.location.href = url;
+                        var uid=msg.uid;
+						var str_uid = url.replace('msg.uid',uid);
+                        var token=msg.token;
+                        var str_token = str_uid.replace('msg.token',token);
+                        var nickname=msg.nickname;
+                        var str_nickname = str_token.replace('msg.nickname',nickname);
+                        var utype=msg.utype;
+                        var str_utype = str_nickname.replace('msg.utype',utype);
+                        var imgurl=msg.imgurl;
+                        var str_imgurl = str_utype.replace('msg.imgurl.html',imgurl);
 
+                        window.location.href = str_imgurl;
+                        
+                        //closeWin();
                     }else if(msg.success===false){
                         if(msg.error == '300'){
                             udiv.attr('errr', '');
@@ -180,7 +210,6 @@ $(document).ready(function () {
                             $('#erroru').text('用户未激活');
                         }
                         if(msg.error == '204'){
-                            console.log(msg.free);
                             udiv.attr('errr', '');
                             $('#erroru').text('用户被冻结');
                         }

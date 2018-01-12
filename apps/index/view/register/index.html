@@ -96,9 +96,9 @@ $(document).ready(function () {
             ndiv.removeAttr('errr');
         }
 
-        if (nickname.val().length > 8) {
+        if (nickname.val().length > 64) {
             ndiv.attr('errr', '');
-            return $('#errorn').text('昵称最多8个字符');
+            return $('#errorn').text('昵称最多64个字符');
         }else{
             ndiv.removeAttr('errr');
         }
