@@ -6,7 +6,7 @@
 </head>
 <link rel="stylesheet" href="__CSS__/xgpwd.css">
 <body>
-	<div class="header"><img src="__IMG__/logo.png" alt=""><a href="http://gamepp.com/chichken/chichken.html" class="back">返回游戏官网页面</a></div>
+	<div class="header"><img src="__IMG__/logo.png" alt=""><a href="http://gamepp.com/chichken/chichken.html" class="back">返回游戏加加官网页面</a></div>
 	<div class="reg_center_big">
 			<div class="reg_title">
 				<h3>修改密码</h3>
@@ -40,6 +40,7 @@
 	</div>
 </body>
 <script type="text/javascript" src='__JS__/jquery.min.js'></script>
+<script type="text/javascript" src="__JS__/md5.min.js"></script>
 <script type="text/javascript">
 $(document).ready(function () {
     var password = $('#password'),password2 = $('#password2'), errorp = $('errorp'), errorp2 = $('errorp2'),submit = $('#submit'), pdiv = $('#p'),pdiv2 = $('#p2'),rdiv = $('#r');
@@ -81,17 +82,18 @@ $(document).ready(function () {
             }
 			
             //前端验证成功,提交form表单信息给服务器存储
-            var pwd = $('#password').val();
-            var pwd2 = $('#password2').val();
+            var pwd = md5($('#password').val());
+            var pwd2 = md5($('#password2').val());
+            var pwd_len = password.val().length;
 
             //获取当前url
             var url = window.location.search;
             var username = url.match(/username\/(\S*)\/uCode/)[1];
-            var uCode = url.substr(-15);
+            var uCode = url.substr(-40);
             //设置ajax
             $.ajax({
                 url:'{:url("index/gbpwd/xgpwd")}',
-                data:{'pwd':pwd,'pwd2':pwd2,'username':username,'uCode':uCode},
+                data:{'pwd':pwd,'pwd2':pwd2,'username':username,'uCode':uCode,'pwd_len':pwd_len},
                 dataType:'json',
                 type:'post',
                 success:function (msg) {
@@ -103,6 +105,10 @@ $(document).ready(function () {
                         if(msg.error == '202'){
                             pdiv.attr('errr', '');
                             $('#errorp').text(msg.info);
+                        }
+                        if(msg.error == '206'){
+                            pdiv.attr('errr', '');
+                            return $('#errorp').text('密码长度为6-16字符');
                         }
                         if(msg.error == '204'){
                             pdiv.attr('errr', '');

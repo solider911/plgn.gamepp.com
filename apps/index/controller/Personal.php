@@ -7,19 +7,21 @@
 namespace app\index\controller;
 use app\common\Base;
 use app\common\common\Email;
+use think\Cookie;
 use think\Db;
 use think\Request;
 use think\Session;
 use think\Url;
 url::root('/index.php?s=');
 class Personal extends Base {
+
     //个人信息首页
     public function my_info(Request $request){
        //设定用户登录状态 act_type:
        $type = $request->param();
        $username =  Session::get('username');
 
-
+       //dump($username);return;
        //获取用户数据
         $user_data = Db::table('ys_login_account')
             ->where('user_account','=',$username)
@@ -41,29 +43,18 @@ class Personal extends Base {
             }
         }
 
-        //用户普通登录
-        if($type['act_type'] == '0'){
-            $data['header_img'] = "__IMG__/de_he_img.jpg";  //默认头像
+        //第三方登录
+        if(Session::get('header_img') != null && Session::get('nickname') != null){
+
+            $data['header_img'] = Session::get('header_img');
+            $data['nickname'] = Session::get('nickname');
+        }else{
+            //用户普通登录
+            $data['header_img'] = "__IMG__/de_he_img.png";  //默认头像
             $data['nickname'] = $user_data['user_nickname'];
         }
 
-       //1为微博绑定邮箱
-       if($type['act_type'] == '1'){
-            //获取头像
-           $header_img = Db::table('ys_login_wb')
-               ->where('user_wb_id','=', Session::get('user_wb_id'))
-               ->find();
-           $data['header_img'] = $header_img['user_wb_image_url'];
 
-            //获取微博昵称
-           $nickname = Db::table('ys_login_wb')
-               ->alias('w')
-               ->join('ys_login_account a','w.user_wb_id = a.user_wb_id')
-               ->where('w.user_wb_id','=',$user_data['user_wb_id'])
-               ->find();
-               $data['nickname'] = $nickname['user_nickname'];
-               $data['user_sex'] = $nickname['user_sex'];
-       }
 
 
 
@@ -115,7 +106,7 @@ class Personal extends Base {
             ];
             $msg_user= [
                 'user_nickname.require' => '用户昵称不能为空',
-                'user_nickname.max' => '16',
+                'user_nickname.max' => '用户昵称最少64个字符',
                 'user_nickname.min' => '用户昵称最少4个字符'
             ];
 
@@ -123,6 +114,15 @@ class Personal extends Base {
             //进行验证
             $result = $this->validate($form_data,$rule_user,$msg_user);  //用户
             if($result == true){
+                //判断昵称是否存在
+                $user_nickname = Db::table('ys_login_account')
+                    ->where('user_nickname','=',$nickname)
+                    ->find();
+
+                if($user_nickname != null){
+                    return json(['success'=>false,'error'=>'202']);
+                }
+
                 $per_info = Db::table('ys_login_account')
                     ->where('user_account','=',$email)
                     ->setField($form_data);
@@ -181,7 +181,7 @@ class Personal extends Base {
                 }
 
                 //邮箱激活随机码
-                $act['user_active_code'] = substr(md5($n_username.time()),-15);
+                $act['user_active_code'] = hash("sha1",$n_username.time());
                 //激活码有效时间
                 $act['user_act_code_time'] = time()+7200;
 
@@ -210,7 +210,6 @@ class Personal extends Base {
     public function qr_email(Request $request){
         if($request->isAjax()){
             $info = $request->param();
-
             //判断邮箱能否更换
             $qr_email_is =  Db::table('ys_login_account')
                 ->where('user_account','=',$info['y_user_email'])
@@ -251,7 +250,8 @@ class Personal extends Base {
             ->setField('user_is_act_code','1');
 
         if($qr_email == true){
-            $url = "http://plgn.gamepp.com/index.php?s=/index/personal/cemail_ok_j";
+            Session::set('username',$info['n_username']);
+            $url = "http://plgn.gamepp.com/?s=/index/personal/cemail_ok_j";
             Header("Location:".$url);
         }
     }
@@ -272,7 +272,7 @@ class Personal extends Base {
         return $this->fetch();
     }
 
-    //取消绑定社交账号
+    //取消绑定微博账号
     public function bd_wb_type_del(Request $request){
         if($request->isAjax()){
             $username_email = input('post.username_email');
@@ -295,14 +295,41 @@ class Personal extends Base {
 
         }
 
+    }
+
+    //取消绑定微信账号
+    public function bd_wx_type_del(Request $request){
+        if($request->isAjax()){
+            $username_email = input('post.username_email');
+            $user_account = Db::table('ys_login_account')
+                ->where('user_account','=',$username_email)
+                ->find();
+
+            if($user_account['user_wx_id'] != null){
+                $wb_del = Db::table('ys_login_account')
+                    ->where('user_wx_id','=',$user_account['user_wx_id'])
+                    ->setField('user_wx_id',null);
+                if($wb_del == true){
+                    return json(['success'=>true]);
+                }else{
+                    return json(['success'=>false,'error'=>'取消关联失败,刷新页面重试']);
+                }
+            }else{
+                return json(['success'=>false,'error'=>'取消关联失败,刷新页面重试']);
+            }
+
+        }
 
     }
+
+
 
     //修改密码
     public function up_pwd(Request $request){
         $y_pwd = input('post.y_pwd');
         $pwd = input('post.pwd');
         $pwd2 = input('post.pwd2');
+        $pwd_len = input('post.$pwd_len');
 
 
         //数据验证
@@ -311,13 +338,11 @@ class Personal extends Base {
             'user_pwd2'=>$pwd2
         ];
         $rule_pwd = [
-            'user_pwd' => 'require|max:16|min:6',
+            'user_pwd' => 'require',
             'user_pwd2'=>'confirm:user_pwd'
         ];
         $msg_pwd= [
             'user_pwd.require' => '密码不能为空',
-            'user_pwd.max' => '密码长度为6-16字符',
-            'user_pwd.min' => '密码长度为6-16字符',
             'user_pwd2.confirm' => '两次输入密码不一致',
         ];
         //进行验证
@@ -326,6 +351,9 @@ class Personal extends Base {
 
 
         if($result_pwd == true){
+            /*if($pwd_len < 6 || $pwd_len > 16){
+                return json(['success'=>false,'error'=>'208']); //密码错误
+            }*/
             $username = Session::get('username');
 
             //核对用户
@@ -336,7 +364,7 @@ class Personal extends Base {
                 ->find();
             //转换成加密密码
             $z_pwd = md5($y_pwd.$salt['user_salt']);
-
+            
             $check_pwd = Db::table('ys_login_account')
                 ->where('user_account','=',$username)
                 ->where('user_pwd','=',$z_pwd)
@@ -363,6 +391,7 @@ class Personal extends Base {
                 ->where('user_account','=',$username)
                 ->setField($data);
             if($info == true) {
+                Session::set('username',null);
                 return json(['success'=>true]);
             }
         }else{
@@ -372,9 +401,8 @@ class Personal extends Base {
 
     //退出
     public function logout(){
-        Session::set('username',null);
-        Session::set('password',null);
-        Session::set('is_rem','0');
+        Session::set('username');
+        Session::set('nickname');
         $url = "http://gamepp.com/chichken/youxijj.html";
         return Header("Location: $url");
     }

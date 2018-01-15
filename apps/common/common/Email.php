@@ -29,7 +29,7 @@ function mail_certification($mail_to, $mail_content){
 
                           您好！感谢您注册成为绝地求生超级助手用户系统的一员。这是一封注册确认邮件，请点击以下链接确认：</br>
                           
-                          <a>{$mail_content}</a> </br>
+                          <a href='{$mail_content}'>{$mail_content}</a> </br>
                           
                           如果链接不能点击，请复制地址到浏览器，然后直接打开。</br>
                           
@@ -76,7 +76,7 @@ function mail_certification($mail_to, $mail_content){
 
                           您好！感谢您注册成为绝地求生超级助手用户系统的一员。这是一封注册确认邮件，请点击以下链接确认：</br>
                           
-                          <a>{$mail_content}</a> </br>
+                          <a href='{$mail_content}'>{$mail_content}</a> </br>
                           
                           您的初始密码为：{$user_pwd}，请尽快前往个人中心修改！
                           
@@ -124,9 +124,9 @@ function mail_certification($mail_to, $mail_content){
             $mail_body = "尊敬的{$mail_to}：您好！</br>
 
                           绝地求生超级助手找回登录密码通知：
-                          请在24小时内点击下面链接找回您的登录密码：</br>
+                          请点击下面链接找回您的登录密码：</br>
                           
-                          <a href='{$mail_content}'>立即重置</a> </br>
+                          <a href='{$mail_content}'>{$mail_content}</a> </br>
                           
                           如果链接不能点击，请复制地址到浏览器，然后直接打开。</br>
                           
@@ -167,9 +167,9 @@ function mail_certification($mail_to, $mail_content){
 
             $mail_body = "尊敬的{$mail_to}：</br>
 
-                          您好！您现在正在更改绝地求生超级助手用户系统的绑定邮箱，请在2小时内点击下面链接进行修改：</br>
+                          您好！您现在正在更改绝地求生超级助手用户系统的绑定邮箱，请点击下面链接进行修改：</br>
                           
-                          <a>{$mail_content}</a> </br>
+                          <a href='{$mail_content}'>{$mail_content}</a> </br>
                           
                           如果链接不能点击，请复制地址到浏览器，然后直接打开。</br>
                           

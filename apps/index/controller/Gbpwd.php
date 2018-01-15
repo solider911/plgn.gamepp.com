@@ -15,27 +15,14 @@ url::root('/index.php?s=');
 
 class Gbpwd extends Controller {
 
-    //找回页面页面
+    //找回密码页面
     public function index(){
         return $this->fetch();
     }
 
-    //找回密码邮箱验证
-
-    /**
-     * @param \think\Request $request
-     *
-     * @return \think\response\Json
-     * author Fox
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\ModelNotFoundException
-     * @throws \think\exception\DbException
-     */
     public function gbpwdE(Request $request){
-
         if($request->isAjax()) {
             $username = input('post.username');
-
             //数据验证
             $form_data = [
                 'user_account' => $username,
@@ -63,25 +50,17 @@ class Gbpwd extends Controller {
                     return json(['success'=>false,'error'=>'202']); //邮箱不存在
                 }
                 //判断用户是否被激活
-                $free = Db::table('ys_login_account')
-                    ->where('user_account','=',$username)
-                    ->field('user_is_act')
-                    ->find();
-                if($free['user_is_act'] != '1'){
+                if($user['user_is_act'] != '1'){
                     return json(['success'=>false,'error'=>'203']); //用户未激活
                 }
 
                 //判断用户是否被冻结
-                $free = Db::table('ys_login_account')
-                    ->where('user_account','=',$username)
-                    ->field('user_is_free')
-                    ->find();
-                if($free['user_is_free'] != '1'){
+                if($user['user_is_free'] != '1'){
                     return json(['success'=>false,'error'=>'204']); //用户被冻结
                 }
 
                 //邮箱激活随机码
-                $user_active_code = substr(md5($username.time()),-15);
+                $user_active_code = hash("sha1",$username.time());
 
                 Db::table('ys_login_account')
                     ->where('user_account','=',$username)
@@ -110,58 +89,74 @@ class Gbpwd extends Controller {
 
     //修改密码页面
     public function xgpwd(Request $request){
-        $data = $request->param();
-        //获取邮件激活信息
-        $user_active_code =$data['uCode'];
-        $username = $data['username'];
+
+        if($request->isAjax()){
+
+            $data = $request->param();
+            //获取邮件激活信息
+            $user_active_code =$data['uCode'];
+           $username = $data['username'];
+           
+
+            $pwd = input('post.pwd');
+            $pwd2 = input('post.pwd2');
+            $pwd_len = input('post.pwd_len');
 
 
-        $pwd = input('post.pwd');
-        $pwd2 = input('post.pwd2');
+            //数据验证
+            $form_data = [
+                'user_pwd'=>$pwd,
+                'user_pwd2'=>$pwd2
+            ];
+            $rule_pwd = [
+                'user_pwd' => 'require',
+                'user_pwd2'=>'confirm:user_pwd'
+            ];
+            $msg_pwd= [
+                'user_pwd.require' => '密码不能为空',
+                'user_pwd2.confirm' => '两次输入密码不一致',
+            ];
+            //进行验证
+            $result_pwd = $this->validate($form_data,$rule_pwd,$msg_pwd);
 
+            if($result_pwd == true){
 
-        //数据验证
-        $form_data = [
-            'user_pwd'=>$pwd,
-            'user_pwd2'=>$pwd
-        ];
-        $rule_pwd = [
-            'user_pwd' => 'require|max:16|min:6',
-            'user_pwd2'=>'confirm:user_pwd'
-        ];
-        $msg_pwd= [
-            'user_pwd.require' => '密码不能为空',
-            'user_pwd.max' => '密码长度为6-16字符',
-            'user_pwd.min' => '密码长度为6-16字符',
-            'user_pwd2.confirm' => '两次输入密码不一致',
-        ];
-        //进行验证
-        $result_pwd = $this->validate($form_data,$rule_pwd,$msg_pwd);
+                if($pwd_len<6 || $pwd_len>16){
+                    return json(['success'=>false,'error'=>'206']);
+                }
 
-        if($result_pwd === true){
-            //产生盐值
-            $salt  = substr(time(),-6);
+                //产生盐值
+                $salt  = substr(time(),-6);
 
-            $data = array(
-                'user_pwd'=>md5($pwd.$salt),
-                'user_salt'=>$salt,
-            );
+                $data = array(
+                    'user_pwd'=>md5($pwd.$salt),
+                    'user_salt'=>$salt,
+                );
 
-            //根据$active_code和$user_id查询是否存在一条记录，存在修改密码
-            $info  = Db::table('ys_login_account')
-                ->where('user_account','=',$username)
-                ->where('user_active_code','=',$user_active_code)
-                ->setField($data);
-            if($info == true) {
-                 Db::table('ys_login_account')
+                //根据$active_code和$user_id查询是否存在一条记录，存在修改密码
+                $info  = Db::table('ys_login_account')
                     ->where('user_account','=',$username)
-                    ->setField('user_active_code',null);
-                return json(['success'=>true]);
+                    ->where('user_active_code','=',$user_active_code)
+                    ->setField($data);
+
+                $info  = Db::table('ys_login_account')
+                    ->where('user_account','=',$username)
+                    //->where('user_active_code','=',$user_active_code)
+                    ->find();
+
+                return json(['success'=>true,'data'=>$user_active_code]);
+
+                if($info == true) {
+                    Db::table('ys_login_account')
+                        ->where('user_account','=',$username)
+                        ->setField('user_active_code',null);
+                    return json(['success'=>true]);
+                }else{
+                    return json(['success'=>false,'error'=>'204']);
+                }
             }else{
-                return json(['success'=>false,'error'=>'204']);
+                return json(['success'=>false,'error'=>'202','info'=>$result_pwd]);
             }
-        }else{
-            return json(['success'=>false,'error'=>'202','info'=>$result_pwd]);
         }
     }
 
@@ -196,7 +191,7 @@ class Gbpwd extends Controller {
         $user_active_code =$data['uCode'];
 
         //邮箱激活随机码
-        $cx_user_active_code = substr(md5($username.time()),-15);
+        $cx_user_active_code = hash("sha1",$username.time());
 
         $reg = Db::table('ys_login_account')
             ->where('user_account','=',$username)
@@ -210,8 +205,6 @@ class Gbpwd extends Controller {
                 $url = "http://plgn.gamepp.com/?s=index/gbpwd/checkpwde/username/{$username}/uCode/{$cx_user_active_code}";
                 header("Location:".$url);
             }
-        }else{
-            return '失败';
         }
     }
 
