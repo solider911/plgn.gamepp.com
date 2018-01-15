@@ -34,6 +34,7 @@ class Login extends Controller {
 	    if(Cookie::get('is_rem') !== '1'){
             Cookie::set('is_rem','0');
             Session::set('username',null);
+
             Session::set('password',null);
 
             $data = array(
