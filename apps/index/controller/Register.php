@@ -44,7 +44,7 @@ class Register extends Controller{
                 'user_nickname'=>$nickname
             ];
             $rule_nick = [
-                'user_nickname' => 'require|max:8|min:4',
+                'user_nickname' => 'require|max:64|min:4',
             ];
             $msg_nick = [
                 'user_nickname.require' => '昵称不能为空',

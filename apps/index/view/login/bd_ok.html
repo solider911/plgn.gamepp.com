@@ -11,7 +11,7 @@
   intervalid = setInterval("fun()", 1000);
   function fun() {
       if (i == 0) {
-          $url = "{:url('index/personal/my_info',['act_type'=>'1'])}";
+          $url = "{:url('index/personal/my_info')}";
           $url = $url.replace('.html','');
           window.location.href = $url;
           clearInterval(intervalid);
@@ -26,7 +26,7 @@
 		  				<img src="__IMG__/img_05.png"  width="130px">
 		  			</div>
 		  			<div class="form-group" style="margin-top: 20px;">
-		  				<img src="__IMG__/success.png" width="320px">
+		  				<img src="__IMG__/success_band.png" width="320px">
 		  			</div>
 		  			<div class="form-group" style="margin-top: 20px;" id="ShowDiv">
 		  				邮箱绑定成功,<time id="time">3</time>秒后 自动跳转到个人中心...

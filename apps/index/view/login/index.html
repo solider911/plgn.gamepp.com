@@ -7,7 +7,7 @@
 </head>
 <link rel="stylesheet" href="__CSS__/pubg_login.css">
 <body>
-	<div class="header"><img src="__IMG__/logo.png" alt=""><a href="http://gamepp.com/chichken/chichken.html/" class="back">返回游戏官网页面</a></div>
+	<div class="header"><img src="__IMG__/logo.png" alt=""><a href="http://gamepp.com/chichken/chichken.html/" class="back">返回游戏加加官网页面</a></div>
 	<div class="reg_center_big">
 			<div class="reg_title">
 				<h3>登录</h3>
@@ -148,7 +148,7 @@ $(document).ready(function () {
                 success:function (msg) {
                     //要求服务器返回一个success成员,值为true
                     if(msg.success===true){
-						window.location.href="{:url('index/personal/my_info',['act_type'=>'0'])}";
+						window.location.href="{:url('index/personal/my_info')}";
                     }else if(msg.success===false){
                         if(msg.error == '300'){
                             udiv.attr('errr', '');

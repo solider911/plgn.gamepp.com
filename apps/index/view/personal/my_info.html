@@ -46,7 +46,7 @@
 				{else/}
 				<img src="{$data['header_img']}" style="width: 35px;height: 35px; float: left;margin-top: 23px;border-radius: 50%">
 				&nbsp;&nbsp;
-				<text style="color: #3D3D3D">{$data['nickname']}</text>
+				<text style="color: #3D3D3D" id="user_username">{$data['nickname']}</text>
 				<a href="{:url('index/personal/logout')}">退出</a>
 				{/if}
           	</div>
@@ -67,11 +67,12 @@
                         </div>
                         {/if}
                         <div class="blueline" id="l1"></div></li>
-					<li id="m2" onclick="javascript:gopage(2)">社交账号绑定<div class="no_check"></div><div class="blueline" id="l2" style="display: none;"></div></li>
-					<li id="m3" onclick="javascript:gopage(3)">修改密码<div class="no_check"></div><div class="blueline" id="l3" style="display: none;"></div></li>
+					<li id="m2" onclick="javascript:gopage(2)">社交账号绑定<div class="no_check">&nbsp;</div><div class="blueline" id="l2" style="display: none;"></div></li>
+					<li id="m3" onclick="javascript:gopage(3)">修改密码<div class="no_check">&nbsp;</div><div class="blueline" id="l3" style="display: none;"></div></li>
 				</ul>
 			</div>
 			
+
 			<div id="container">
 				<div id="content">
 					<div id="c1">
@@ -91,7 +92,7 @@
 								</ul>
 
 								<div class="my_info_sub">
-									<button class="my_info_sub1" type="submit">取消修改</button>
+									<button class="my_info_sub1" onclick="no_submit()" disabled="disabled">取消修改</button>
 									<button class="my_info_sub2" id="submit" type="submit" style="background: #108FF0;">确认修改</button>
 								</div>
 							</div>
@@ -108,21 +109,21 @@
 									
 									<li class="tabGroup_img_li1">
 										
-											{if condition="$data.user_steam_id eq 1"}
-										<img src="__IMG__/ic_steam_0.png">
-										<div class="bd_content">
+										{if condition="$data.user_steam_id eq 1"}
+											<img src="__IMG__/ic_steam_1.png" id="img_steam">
+											<div class="bd_content">
 											<span class="bd_type">Steam账号</span>
-											<a href="javascript:void(0)"><div class="bd_no">取消绑定</div></a>
-											<span class="bd_state">已绑定</span>
+											<a href="javascript:void(0)" onclick="Email_bind_cancel()"><div id="steam_bd_no" class="bd_no">取消绑定</div></a>
+											<span id="steam_bd_state" class="bd_state">已绑定</span>
 											</div>
-											{else/}
+										{else/}
 											<img src="__IMG__/ic_steam_0.png">
-										<div class="bd_content">
+											<div class="bd_content">
 											<span class="bd_type">Steam账号</span>
 											<a href="javascript:void(0)" onclick="Email_bind(3)"><div class="bd_ok">+ 绑定</div></a>
-											<span class="bd_state">未绑定</span>
+											<span id="steam_bd_state" class="bd_state">未绑定</span>
 											</div>
-											{/if}
+										{/if}
 										
 									</li>
 									
@@ -139,7 +140,7 @@
 											<img src="__IMG__/ic_qq_0.png">
 										<div class="bd_content">
 											<span class="bd_type">QQ</span>
-											<a href="javascript:void(0)" onclick="bd_wb_type_add(2)"><div class="bd_ok">+ 绑定</div></a>
+											<a href="javascript:void(0)" onclick="bd_type_add(2)"><div class="bd_ok">+ 绑定</div></a>
 											<span class="bd_state">未绑定</span>
 											</div>
 											{/if}
@@ -150,17 +151,17 @@
 									<li class="tabGroup_img_li3">
 										
 											{if condition="$data.user_wx_id eq 1"}
-										<img src="__IMG__/ic_wechat_1.png">
+										<img src="__IMG__/ic_wechat_1.png" id="img_wx">
 										<div class="bd_content">
 											<span class="bd_type">微信</span>
-											<a href="javascript:void(0)"><div class="bd_no">取消绑定</div></a>
-											<span class="bd_state">已绑定</span>
+											<a href="javascript:void(0)" onclick="bd_wx_type_del()"><div id="wx_bd_no" class="bd_no">取消绑定</div></a>
+											<span id="wx_bd_state" class="bd_state">已绑定</span>
 											</div>
 											{else/}
 											<img src="__IMG__/ic_wechat_0.png">
 										<div class="bd_content">
 											<span class="bd_type">微信</span>
-											<a href="javascript:void(0)" onclick="bd_wb_type_add(1)"><div class="bd_ok">+ 绑定</div></a>
+											<a href="javascript:void(0)" onclick="bd_type_add(1)"><div class="bd_ok">+ 绑定</div></a>
 											<span class="bd_state">未绑定</span>
 											</div>
 											{/if}
@@ -171,7 +172,7 @@
 									<li class="tabGroup_img_li4">
 										
 											{if condition="$data.user_wb_id eq 1"}
-										<img src="__IMG__/ic_weibo_1.png">
+										<img src="__IMG__/ic_weibo_1.png" id="img_wb">
 										<div class="bd_content">
 											<span class="bd_type">微博</span>
 											<a href="javascript:void(0)" onclick="bd_wb_type_del()"><div id="wb_bd_no" class="bd_no">取消绑定</div></a>
@@ -181,7 +182,7 @@
 										<img src="__IMG__/ic_weibo_0.png">
 										<div class="bd_content">
 											<span class="bd_type">微博</span>
-											<a href="javascript:void(0)" onclick="bd_wb_type_add(0)"><div class="bd_ok">+ 绑定</div></a>
+											<a href="javascript:void(0)" onclick="bd_type_add(0)"><div class="bd_ok">+ 绑定</div></a>
 											<span  id="wb_bd_state" class="bd_state">未绑定</span>
 											</div>
 											{/if}
@@ -208,7 +209,7 @@
 								</ul>
 
 								<div class="my_info_sub">
-									<button class="my_info_sub1" type="submit">取消修改</button>
+									<button class="my_info_sub1" onclick="no_submit()" disabled="disabled">取消修改</button>
 									<button class="my_info_sub2" type="submit" id="submit1" style="background: #108FF0;">确认修改</button>
 								</div>
 							</div>
@@ -229,6 +230,16 @@
 <script type="text/javascript" src='__JS__/jquery.min.js'></script>
 <script type="text/javascript" src="__JS__/md5.min.js"></script>
 <script type="text/javascript">
+	//取消修改
+	function no_submit(){
+      history.go();
+    }
+	var user_name = $('#user_username').text();
+	var name_len = $('#user_username').text().length;
+	if(name_len > 12){
+       var n_user_name = user_name.substr(0,10);
+        $('#user_username').text(n_user_name+"...");
+	}
 	//取消绑定微博
 	function bd_wb_type_del(){
 	    var username_email = $("#username_email").val();
@@ -244,27 +255,55 @@
                     $("#wb_bd_no").addClass("bd_ok");
                     $("#wb_bd_no").text('+ 绑定');
                     $("#wb_bd_state").text('未绑定');
+                    $("#img_wb").attr('src','__IMG__/ic_weibo_0.png');
                 } else if (msg.success === false) {
                 	alert(msg.error);
                 }
             }
         });
 	}
+    //取消绑定微信
+    function bd_wx_type_del(){
+        var username_email = $("#username_email").val();
+        $.ajax({
+            url: '{:url("index/Personal/bd_wx_type_del")}',
+            data: {'username_email': username_email},
+            dataType: 'json',
+            type: 'post',
+            success: function (msg) {
+                //要求服务器返回一个success成员,值为true
+                if (msg.success === true) {
+                    $("#wx_bd_no").removeClass("bd_no");
+                    $("#wx_bd_no").addClass("bd_ok");
+                    $("#wx_bd_no").text('+ 绑定');
+                    $("#wx_bd_state").text('未绑定');
+                    $("#img_wx").attr('src','__IMG__/ic_wechat_0.png');
+                } else if (msg.success === false) {
+                    alert(msg.error);
+                }
+            }
+        });
+    }
     //绑定微博
-    function bd_wb_type_add(id){
+    function bd_type_add(id){
 	    //获取邮箱
         var uemail = $('#username_email').val();
         //获取登录方法
 		var url_type = window.location.href;
-        var act_type = url_type.split('act_type/')[1].substr(0, 1);
-		
-	    var url = "{:url('index/login/weibologin',['bd_type'=>'bd_type_id','uemail'=>'uemail_str','act_type'=>'act_type'])}";
-	    var str = url.replace('uemail_str',uemail);
-	    var res = str.replace('bd_type_id',id);
-	    var href = res.replace('act_type.html',act_type);
+		//微博
 	   	if(id == '0'){
-            window.location.href = href;
+            var url = "{:url('index/login/weibologin',['bd_type'=>'bd_type_id','uemail'=>'uemail_str'])}";
+            var res = url.replace('bd_type_id',id);
+            var str = res.replace('uemail_str.html',uemail);
+            window.location.href = str;
 		}
+		//微信
+        if(id == '1'){
+            var url = "{:url('index/login/wxlogin',['bd_type'=>'bd_type_id','uemail'=>'uemail_str'])}";
+            var res = url.replace('bd_type_id',id);
+            var str = res.replace('uemail_str.html',uemail);
+            window.location.href = str;
+        }
 	}
 
 
@@ -274,23 +313,29 @@
         var uemail = $('#username_email').val();
         var bind_url = "http://plgn.gamepp.com/index.php?s=/index/login_steam/login/email/"+uemail;
         window.location.href = bind_url;
-        return;
-        // if (id == 3)
-        //     var bind_url = "{:url('index/loginSteam/login',['bd_type'=>'bd_type_id','uemail'=>'uemail_str','act_type'=>'act_type'])}";
-        //
-        //
-        //
-        //
-        // var bind_url = bind_url.replace('uemail_str',uemail);
-        // var bind_url = bind_url.replace('bd_type_id',id);
-        // var bind_url = bind_url.replace('act_type.html',act_type);
+    }
 
-        alert(bind_url);
-        return;
-
-        if(id == '0'){
-            window.location.href = bind_url;
-        }
+    //取消steam绑定
+    function Email_bind_cancel(){
+        var u_email = $("#username_email").val();
+        $.ajax({
+            url: '{:url("index/login_steam/bind_cancel")}',
+            data: {'u_email': u_email},
+            dataType: 'json',
+            type: 'post',
+            success: function (msg) {
+                //要求服务器返回一个success成员,值为true
+                if (msg.success === true) {
+                    $("#steam_bd_no").removeClass("bd_no");
+                    $("#steam_bd_no").addClass("bd_ok");
+                    $("#steam_bd_no").text('+ 绑定');
+                    $("#steam_bd_state").text('未绑定');
+                    $("#img_steam").attr('src','__IMG__/ic_steam_0.png');
+                } else if (msg.success === false) {
+                    alert(msg.error);
+                }
+            }
+        });
     }
 
 	
@@ -325,9 +370,9 @@
                 $('#error').css('color', 'red');
                 return $('#error').text('用户昵称不能为空');
             }
-            if (nickname.val().length > 18) {
+            if (nickname.val().length > 64) {
                 $('#error').css('color', 'red');
-                return $('#error').text('用户昵称最多16个字符');
+                return $('#error').text('用户昵称最多64个字符');
             }
             if (nickname.val().length < 4) {
                 $('#error').css('color', 'red');
@@ -361,6 +406,10 @@
                             if (msg.error == '300') {
                                 $('#error').css('color', 'red');
                                 $('#error').text(msg.info);
+                            }
+                            if (msg.error == '202') {
+                                $('#error').css('color', 'red');
+                                $('#error').text('昵称已被使用');
                             }
                         }
                     }
