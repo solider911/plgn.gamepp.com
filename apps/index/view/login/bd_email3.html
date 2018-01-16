@@ -6,7 +6,7 @@
 </head>
 <link rel="stylesheet" href="__CSS__/bd_email1.css">
 <body>
-	<div class="header"><img src="__IMG__/logo.png" alt=""><a href="http://gamepp.com/chichken/chichken.html" class="back">返回游戏官网页面</a></div>
+	<div class="header"><img src="__IMG__/logo.png" alt=""><a href="http://gamepp.com/chichken/chichken.html" class="back">返回游戏加加官网页面</a></div>
 	<div class="reg_center_big">
 			<div class="reg_title">
 				<h3>绑定邮箱</h3>
@@ -21,7 +21,7 @@
 
 		  			<div class="form-group">
 					<input type="checkbox" id="rem">
-					<label for="rem">已同意<a href="#" style="color: #6AB2E3;">《PUBG加加++用户协议》</a></label>
+					<label for="rem">已同意<a href="{:url('index/login/user_agre')}" target="_blank" style="color: #6AB2E3;">《PUBG加加++用户协议》</a></label>
                         <errorr id="errorr">请勾选用户协议</errorr>
 					</div>
 
@@ -31,9 +31,9 @@
 				</form>
 
 				<div class="email_explain" style="display: none;">
-				由于该邮箱未被注册,我们已发送<b>激活链接</b>和<b>初始密码</b>到您的邮箱,请你登录邮箱查看激活并绑定.<br/>
+				由于该邮箱未被绑定,我们已发送<b>激活链接</b>和<b>初始密码</b>到您的邮箱,请你登录邮箱查看激活并绑定.<br/>
 				<br/>
-				希望您尽快前往个人中心修改密码.
+				希望您尽快前往个人中心修改密码,如已激活直接前往<a href="javascript:void(0)"  onclick="gomyinfo()" style="color: #6AB2E3;">个人中心</a>.
 				</div>
 
 				<div class="again_send" style="display: none;">
@@ -41,9 +41,9 @@
 				</div>
 				
 				
-				<input type="hidden" value="" id="username">
+				<input type="hidden" value="" id="username1">
 				<input type="hidden" value="" id="uCode">
-				<input type="hidden" value="" id="user_wb_id">
+				<input type="hidden" value="" id="user_qq_id">
 			</div>
 	</div>
 
@@ -54,23 +54,50 @@
 </body>
 <script type="text/javascript" src='__JS__/jquery.min.js'></script>
 <script type="text/javascript">
+	
+	function gomyinfo(){
+        var username = $('#username1').val();
+        var url = window.location.href;
+        var code_id = url.split('code/')[1];
+        //用户,微博,微信,qq 0123
+        var code_type = '3';
 
-	$("#cx_email").click(function(){
-        //设置ajax
-        var username = $('#username').val();
-        var uCode = $('#uCode').val();
-        var user_wb_id = $('#user_wb_id').val();
         $.ajax({
-            url:'{:url("index/login/cx_email")}',
-            data:{'username':username,'uCode':uCode,'user_wb_id':user_wb_id},
+            url:"{:url('index/login/gomyinfo')}",
+            data:{'username':username,'code_id':code_id,'code_type':code_type},
             dataType:'json',
             type:'post',
             success:function (msg) {
                 //要求服务器返回一个success成员,值为true
                 if(msg.success===true){
-                    $('#user_email').val(msg.username);
+                    window.location.href = "{:url('index/personal/my_info')}";
+                }else if(msg.success===false){
+                    if(msg.error == 202){
+                        alert("邮箱还未绑定账号");
+                    }
+                }
+            }
+        });
+
+
+    }
+
+    $("#cx_email").click(function(){
+        //设置ajax
+        var username = $('#username1').val();
+        var uCode = $('#uCode').val();
+        var user_qq_id = $('#user_qq_id').val();
+        $.ajax({
+            url:'{:url("index/login/cx_email3")}',
+            data:{'username':username,'uCode':uCode,'user_qq_id':user_qq_id},
+            dataType:'json',
+            type:'post',
+            success:function (msg) {
+                //要求服务器返回一个success成员,值为true
+                if(msg.success===true){
+                    $('#username1').val(msg.username);
                     $('#user_code').val(msg.uCode);
-                    $('#user_wb_id').val(msg.user_wb_id);
+                    $('#user_wx_id').val(msg.user_qq_id);
                     $(".email_explain").show();
                     $(".again_send").show();
                 }else if(msg.success===false){
@@ -104,9 +131,9 @@
             }else{
                 udiv.removeAttr('errr');
             }
-            if (username.val().length > 18) {
+            if (username.val().length > 64) {
                 udiv.attr('errr', '');
-                return $('#erroru').text('邮箱最多18个字符');
+                return $('#erroru').text('邮箱最多64个字符');
             }else{
                 udiv.removeAttr('errr');
             }
@@ -151,9 +178,9 @@
                     success:function (msg) {
                         //要求服务器返回一个success成员,值为true
                         if(msg.success===true){
-                            $('#user_email').val(msg.username);
+                            $('#username1').val(msg.username);
                             $('#uCode').val(msg.uCode);
-                            $('#user_wb_id').val(msg.user_wb_id);
+                            $('#user_qq_id').val(msg.user_qq_id);
                             $(".email_explain").show();
                             $(".again_send").show();
                         }else if(msg.success===false){
@@ -163,7 +190,7 @@
                             }
                             if(msg.error == '206'){
                                 udiv.attr('errr', '');
-                                return $('#erroru').text('邮箱已被注册');
+                                return $('#erroru').text('邮箱已被绑定');
                             }
                             if(msg.error == '208'){
                                 return $('#errorr').show()

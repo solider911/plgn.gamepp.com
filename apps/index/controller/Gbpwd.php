@@ -29,11 +29,11 @@ class Gbpwd extends Controller {
             ];
             //邮箱验证
             $rule_user = [
-                'user_account' => 'require|max:18|min:4|email',
+                'user_account' => 'require|max:64|min:4|email',
             ];
             $msg_user  = [
                 'user_account.require' => '邮箱不能为空',
-                'user_account.max'     => '邮箱最多18个字符',
+                'user_account.max'     => '邮箱最多64个字符',
                 'user_account.min'     => '邮箱最少4个字符',
                 'user_account.email'   => '邮箱格式不正确',
             ];

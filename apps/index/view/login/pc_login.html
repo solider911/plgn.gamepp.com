@@ -78,6 +78,33 @@
 <script type="text/javascript" src='__JS__/jquery.min.js'></script>
 <script type="text/javascript" src="__JS__/md5.min.js"></script>
 <script type="text/javascript">
+	//设置cookie
+    function setCookie(name,value)
+    {
+        var Days = 30;
+        var exp = new Date();
+        exp.setTime(exp.getTime() + Days*24*60*60*1000);
+        document.cookie = name + "="+ escape (value) + ";expires=" + exp.toGMTString();
+    }
+    //获取cookie
+    function getCookie(name)
+    {
+        var arr,reg=new RegExp("(^| )"+name+"=([^;]*)(;|$)");
+        if(arr=document.cookie.match(reg))
+            return unescape(arr[2]);
+        else
+            return null;
+    }
+    //删除cookie
+    function delCookie(name)
+    {
+        var exp = new Date();
+        exp.setTime(exp.getTime() - 1);
+        var cval=getCookie(name);
+        if(cval!=null)
+            document.cookie= name + "="+cval+";expires="+exp.toGMTString();
+    }
+	
 	
 	//返回
 	function goback(){
@@ -92,6 +119,11 @@
          window.external.openurl("http://plgn.gamepp.com/?s=/index/register/index"+"?time="+Date.parse(new Date()));
      }
 $(document).ready(function () {
+
+    //获取cookie
+    $('#password').val(getCookie('asd'));
+    $('#username').val(getCookie('ame'));
+    
     var username = $('#username'), password = $('#password'),erroru = $('erroru'), errorp = $('errorp'),submit = $('#submit'), udiv = $('#u'), pdiv = $('#p');
     username.blur(function () {
         user_code();
@@ -108,9 +140,9 @@ $(document).ready(function () {
         }else{
             udiv.removeAttr('errr');
         }
-        if (username.val().length > 18) {
+        if (username.val().length > 64) {
             udiv.attr('errr', '');
-            return $('#erroru').text('邮箱最多18个字符');
+            return $('#erroru').text('邮箱最多64个字符');
         }else{
             udiv.removeAttr('errr');
         }
@@ -157,8 +189,12 @@ $(document).ready(function () {
             var pwd_len = password.val().length;
             if($('#rem').is(':checked')) {
                 var keep_pwd = $('#rem').val();
+                setCookie('asd',$('#password').val());
+                setCookie('ame',$('#username').val());
             }else{
                 var keep_pwd = '0';
+                setCookie('asd','');
+                setCookie('ame','');
             }
             if($('#re_lo').is(':checked')) {
                 var re_lo = $('#re_lo').val();

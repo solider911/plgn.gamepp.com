@@ -3,8 +3,8 @@ namespace app\common\common;
 
 class QQsdk
 {
-    private $app_id = '101456064';
-    private $app_secret = '53e51ff07928168b03f6e1f34007858a';
+    private $app_id = '101457184';
+    private $app_secret = 'd75cb7a73ea373a1737165fb1042bdf6';
     private $redirect = 'http://plgn.gamepp.com/?s=/index/login/qqCallback';
 
     function __construct()

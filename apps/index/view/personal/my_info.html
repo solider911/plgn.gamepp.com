@@ -128,13 +128,12 @@
 									</li>
 									
 									<li class="tabGroup_img_li2">
-										
 											{if condition="$data.user_qq_id eq 1"}
-										<img src="__IMG__/ic_qq_1.png">
+											<img src="__IMG__/ic_qq_1.png" id="img_qq">
 										<div class="bd_content">
 											<span class="bd_type">QQ</span>
-											<a href="javascript:void(0)"><div class="bd_no">取消绑定</div></a>
-											<span class="bd_state">已绑定</span>
+											<a href="javascript:void(0)" onclick="bd_qq_type_del()"><div id="qq_bd_no" class="bd_no">取消绑定</div></a>
+											<span id="qq_bd_state" class="bd_state">已绑定</span>
 											</div>
 											{else/}
 											<img src="__IMG__/ic_qq_0.png">
@@ -142,14 +141,11 @@
 											<span class="bd_type">QQ</span>
 											<a href="javascript:void(0)" onclick="bd_type_add(2)"><div class="bd_ok">+ 绑定</div></a>
 											<span class="bd_state">未绑定</span>
-											</div>
+										</div>
 											{/if}
-										
 									</li>
 									
-									
 									<li class="tabGroup_img_li3">
-										
 											{if condition="$data.user_wx_id eq 1"}
 										<img src="__IMG__/ic_wechat_1.png" id="img_wx">
 										<div class="bd_content">
@@ -284,6 +280,29 @@
             }
         });
     }
+
+    //取消绑定qq
+    function bd_qq_type_del(){
+        var username_email = $("#username_email").val();
+        $.ajax({
+            url: '{:url("index/Personal/bd_qq_type_del")}',
+            data: {'username_email': username_email},
+            dataType: 'json',
+            type: 'post',
+            success: function (msg) {
+                //要求服务器返回一个success成员,值为true
+                if (msg.success === true) {
+                    $("#qq_bd_no").removeClass("bd_no");
+                    $("#qq_bd_no").addClass("bd_ok");
+                    $("#qq_bd_no").text('+ 绑定');
+                    $("#qq_bd_state").text('未绑定');
+                    $("#img_qq").attr('src','__IMG__/ic_qq_0.png');
+                } else if (msg.success === false) {
+                    alert(msg.error);
+                }
+            }
+        });
+    }
     //绑定微博
     function bd_type_add(id){
 	    //获取邮箱
@@ -304,6 +323,14 @@
             var str = res.replace('uemail_str.html',uemail);
             window.location.href = str;
         }
+        //qq
+        if(id == '2'){
+            var url = "{:url('index/login/qqlogin',['bd_type'=>'bd_type_id','uemail'=>'uemail_str'])}";
+            var res = url.replace('bd_type_id',id);
+            var str = res.replace('uemail_str.html',uemail);
+            window.location.href = str;
+        }
+		
 	}
 
 

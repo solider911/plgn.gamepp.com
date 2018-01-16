@@ -3,6 +3,7 @@
 <head>
 	<meta charset="UTF-8">
 	<title>绑定邮箱</title>
+		<link rel="shortcut icon" href="http://plgn.gamepp.com/favicon.ico" />
 </head>
 <link rel="stylesheet" href="__CSS__/bd_email1.css">
 <body>
@@ -130,9 +131,9 @@ $(document).ready(function () {
         }else{
             udiv.removeAttr('errr');
         }
-        if (username.val().length > 18) {
+        if (username.val().length > 64) {
             udiv.attr('errr', '');
-            return $('#erroru').text('邮箱最多18个字符');
+            return $('#erroru').text('邮箱最多64个字符');
         }else{
             udiv.removeAttr('errr');
         }

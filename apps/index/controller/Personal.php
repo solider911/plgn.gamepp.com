@@ -29,6 +29,7 @@ class Personal extends Base {
 
         if($username == null){
             $data['is_login'] = '0'; //0为没登录
+            $this->assign('data',$data);
             return $this->fetch();
         }else{
             $data['is_login'] = '1'; //1为登录
@@ -50,13 +51,9 @@ class Personal extends Base {
             $data['nickname'] = Session::get('nickname');
         }else{
             //用户普通登录
-            $data['header_img'] = "__IMG__/de_he_img.png";  //默认头像
+            $data['header_img'] = "http://plgn.gamepp.com/public/deimg/tx_default.png";  //默认头像
             $data['nickname'] = $user_data['user_nickname'];
         }
-
-
-
-
 
        //判断第三方是否绑定
         //预设为1
@@ -322,6 +319,29 @@ class Personal extends Base {
 
     }
 
+    //取消绑定微信账号
+    public function bd_qq_type_del(Request $request){
+        if($request->isAjax()){
+            $username_email = input('post.username_email');
+            $user_account = Db::table('ys_login_account')
+                ->where('user_account','=',$username_email)
+                ->find();
+
+            if($user_account['user_qq_id'] != null){
+                $wb_del = Db::table('ys_login_account')
+                    ->where('user_qq_id','=',$user_account['user_qq_id'])
+                    ->setField('user_qq_id',null);
+                if($wb_del == true){
+                    return json(['success'=>true]);
+                }else{
+                    return json(['success'=>false,'error'=>'取消关联失败,刷新页面重试']);
+                }
+            }else{
+                return json(['success'=>false,'error'=>'取消关联失败,刷新页面重试']);
+            }
+        }
+    }
+
 
 
     //修改密码
@@ -401,8 +421,10 @@ class Personal extends Base {
 
     //退出
     public function logout(){
-        Session::set('username');
-        Session::set('nickname');
+        Session::set('username',null);
+        Session::set('nickname',null);
+        Session::set('user_wx_id',null);
+        Session::set('header_img',null);
         $url = "http://gamepp.com/chichken/youxijj.html";
         return Header("Location: $url");
     }

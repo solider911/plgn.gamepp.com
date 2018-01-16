@@ -4,6 +4,9 @@
 	<meta charset="UTF-8">
 	<meta property="wb:webmaster" content="25f74ccdd3685c15" />
 	<title>登录</title>
+	<link rel="bookmark" type="image/x-icon" href="http://plgn.gamepp.com/favicon.ico"/>
+　　<link rel="shortcut icon" href="http://plgn.gamepp.com/favicon.ico">
+　　<link rel="icon" href="http://plgn.gamepp.com/favicon.ico">
 </head>
 <link rel="stylesheet" href="__CSS__/pubg_login.css">
 <body>
@@ -47,9 +50,9 @@
 						<div class="ligin_type">
 							其他登录方式:
 								<ul>
-									<li><a href="{:url('index/login/qqlogin',['bd_type'=>''])}"><img src="__IMG__/btn_qq.png" alt="QQ"></a></li>
-									<li><a href="{:url('index/login/wxlogin',['bd_type'=>''])}"><img src="__IMG__/btn_wechat.png" alt="微信"></a></li>
-									<li><a href="{:url('index/login/weibologin',['bd_type'=>''])}"><img src="__IMG__/btn_weibo.png" alt="微博"></a></li>
+									<li><a href="{:url('index/login/qqlogin')}"><img src="__IMG__/btn_qq.png" alt="QQ"></a></li>
+									<li><a href="{:url('index/login/wxlogin')}"><img src="__IMG__/btn_wechat.png" alt="微信"></a></li>
+									<li><a href="{:url('index/login/weibologin')}"><img src="__IMG__/btn_weibo.png" alt="微博"></a></li>
 								</ul>
 
 							
@@ -69,9 +72,37 @@
 <script type="text/javascript" src='__JS__/jquery.min.js'></script>
 <script type="text/javascript" src="__JS__/md5.min.js"></script>
 <script type="text/javascript">
+	//设置cookie
+    function setCookie(name,value)
+    {
+        var Days = 30;
+        var exp = new Date();
+        exp.setTime(exp.getTime() + Days*24*60*60*1000);
+        document.cookie = name + "="+ escape (value) + ";expires=" + exp.toGMTString();
+    }
+    //获取cookie
+    function getCookie(name)
+    {
+        var arr,reg=new RegExp("(^| )"+name+"=([^;]*)(;|$)");
+        if(arr=document.cookie.match(reg))
+            return unescape(arr[2]);
+        else
+            return null;
+    }
+    //删除cookie
+    function delCookie(name)
+    {
+        var exp = new Date();
+        exp.setTime(exp.getTime() - 1);
+        var cval=getCookie(name);
+        if(cval!=null)
+            document.cookie= name + "="+cval+";expires="+exp.toGMTString();
+    }
 $(document).ready(function () {
-
-	var username = $('#username'), password = $('#password'),erroru = $('erroru'), errorp = $('errorp'),submit = $('#submit'), udiv = $('#u'), pdiv = $('#p');
+    //获取cookie
+    $('#password').val(getCookie('asd'));
+    $('#username').val(getCookie('ame'));
+    var username = $('#username'), password = $('#password'),erroru = $('erroru'), errorp = $('errorp'),submit = $('#submit'), udiv = $('#u'), pdiv = $('#p');
 	username.blur(function () {
         user_code();
 	});
@@ -126,7 +157,6 @@ $(document).ready(function () {
         
         return true;
 	}
-
     submit.on('click', function (event) {
         event.preventDefault();
         if(user_code() == true && pwd_code() == true){
@@ -136,8 +166,12 @@ $(document).ready(function () {
             var pwd_len = password.val().length;
             if($('#rem').is(':checked')) {
                 var keep_pwd = $('#rem').val();
+                setCookie('asd',$('#password').val());
+                setCookie('ame',$('#username').val());
             }else{
                 var keep_pwd = '0';
+                setCookie('asd','');
+                setCookie('ame','');
             }
             //设置ajax
             $.ajax({

@@ -15,10 +15,6 @@ url::root('/index.php?s=');
 
 
 class Register extends Controller{
-    public function aaemail(){
-        $email = new Email();
-       $email->mail_certification("1499622690@qq.com", "www.haha.com");
-    }
     //注册页面
     public function index(){
         return $this->fetch();
@@ -54,11 +50,11 @@ class Register extends Controller{
 
 
             $rule_user = [
-                'user_account' => 'require|max:18|min:4|email',
+                'user_account' => 'require|max:64|min:4|email',
             ];
             $msg_user= [
                 'user_account.require' => '邮箱不能为空',
-                'user_account.max' => '邮箱最多18个字符',
+                'user_account.max' => '邮箱最多64个字符',
                 'user_account.min' => '邮箱最少4个字符',
                 'user_account.email' => '邮箱格式不正确',
             ];
